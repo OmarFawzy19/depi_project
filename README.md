@@ -1,3 +1,6 @@
+
+📎 Project Name  (Makanak)
+
 📌 Project Overview
 
 Makanak is a location-based real estate platform that helps users find nearby properties available for rent or sale based on their current geographic location. The application connects property owners directly with potential buyers or renters, providing detailed listings that include images, prices, and precise locations. By leveraging geolocation services and interactive maps, Makanak simplifies the real estate discovery process and enables seamless communication between all parties through a single platform.
