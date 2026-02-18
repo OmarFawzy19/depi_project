@@ -1,8 +1,3 @@
-Got you 👍
-Here’s the **clean, fully professional English version**, ready for submission or README use:
-
----
-
 # **Makanak**
 
 ### *Location-Based Real Estate Platform*
@@ -87,12 +82,3 @@ Here’s the **clean, fully professional English version**, ready for submission
 * Prepare final documentation and project presentation
 
 ---
-
-If you want:
-
-* ✅ **Short academic version**
-* ✅ **README.md (GitHub-ready)**
-* ✅ **Future enhancements section**
-* ✅ **System architecture overview**
-
-Just say the word 🚀
