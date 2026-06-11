@@ -1,0 +1,1 @@
+export { PropertyMap as MapView } from "@/components/PropertyMap";
