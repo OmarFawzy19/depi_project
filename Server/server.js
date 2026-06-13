@@ -5,17 +5,30 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 
 const app = express();
+
+const logger = require("./middleware/logger");
+const errorHandler = require("./middleware/errorHandler");
+const rateLimiter = require("./middleware/rateLimiter");
+
 // =======================
 // MIDDLEWARE
 // =======================
 app.use(cors());
 app.use(express.json());
+app.use(logger);
+app.use(rateLimiter);
 
+// =======================
+// ROUTES
+// =======================
 const authRoutes = require("./routes/authRoute");
 const propertyRoutes = require("./routes/propertyRoute");
+const adminRoutes = require("./routes/adminRoute");
 const auth = require("./middleware/auth");
+
 app.use("/api/auth", authRoutes);
 app.use("/api/properties", propertyRoutes);
+app.use("/api/admin", adminRoutes);
 
 // =======================
 // TEST ROUTE (protected)
@@ -24,12 +37,20 @@ app.get("/api/test", auth, (req, res) => {
   res.json({ msg: "Protected works", user: req.user });
 });
 
-
-
-
+// =======================
+// 404 HANDLER
+// =======================
+app.use((req, res) => {
+  res.status(404).json({ error: "Route not found" });
+});
 
 // =======================
-// DB CONNECTION (Atlas)
+// ERROR HANDLER
+// =======================
+app.use(errorHandler);
+
+// =======================
+// DB CONNECTION
 // =======================
 mongoose
   .connect(process.env.MONGO_URI)
