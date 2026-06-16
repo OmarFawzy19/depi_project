@@ -1,4 +1,6 @@
+
 require("dotenv").config();
+
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -29,6 +31,8 @@ const auth = require("./middleware/auth");
 app.use("/api/auth", authRoutes);
 app.use("/api/properties", propertyRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/favorites", favoriteRoutes);
+app.use("/api/enquiries", enquiryRoutes);
 
 // =======================
 // TEST ROUTE (protected)
@@ -69,3 +73,8 @@ app.get("/", (req, res) => {
 // =======================
 const PORT = 5000;
 app.listen(PORT, () => console.log("Server running on port 5000 🚀"));
+
+
+// favs part 
+const favoriteRoutes = require("./routes/favoriteRoutes");
+const enquiryRoutes = require("./routes/enquiryRoutes");
