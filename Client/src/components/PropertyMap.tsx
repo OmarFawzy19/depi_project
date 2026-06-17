@@ -16,6 +16,11 @@ interface PropertyMapProps {
   onSelect?: (lat: number, lng: number) => void;
   selectedPoint?: { lat: number; lng: number } | null;
   className?: string;
+  onBoundsChange?: (
+    center: { lat: number; lng: number },
+    radiusKm: number,
+    bounds: { minLat: number; maxLat: number; minLng: number; maxLng: number }
+  ) => void;
 }
 
 const priceIcon = (price: number, type: "rent" | "sale") =>
@@ -43,6 +48,7 @@ export function PropertyMap({
   onSelect,
   selectedPoint,
   className,
+  onBoundsChange,
 }: PropertyMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -50,6 +56,11 @@ export function PropertyMap({
   const userMarkerRef = useRef<L.Marker | null>(null);
   const userCircleRef = useRef<L.Circle | null>(null);
   const pickMarkerRef = useRef<L.Marker | null>(null);
+
+  const onBoundsChangeRef = useRef(onBoundsChange);
+  useEffect(() => {
+    onBoundsChangeRef.current = onBoundsChange;
+  }, [onBoundsChange]);
 
   const initialCenter: [number, number] = useMemo(() => {
     if (center) return center;
@@ -80,6 +91,21 @@ export function PropertyMap({
         onSelect?.(e.latlng.lat, e.latlng.lng);
       });
     }
+
+    map.on("moveend", () => {
+      if (onBoundsChangeRef.current) {
+        const currentCenter = map.getCenter();
+        const bounds = map.getBounds();
+        const radiusKm = currentCenter.distanceTo(bounds.getNorthEast()) / 1000;
+        const sw = bounds.getSouthWest();
+        const ne = bounds.getNorthEast();
+        onBoundsChangeRef.current(
+          { lat: currentCenter.lat, lng: currentCenter.lng },
+          radiusKm,
+          { minLat: sw.lat, maxLat: ne.lat, minLng: sw.lng, maxLng: ne.lng }
+        );
+      }
+    });
 
     return () => {
       map.remove();

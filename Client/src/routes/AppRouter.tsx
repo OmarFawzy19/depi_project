@@ -10,6 +10,7 @@ import ResetPassword from "@/pages/ResetPassword";
 import VerifyOtp from "@/pages/VerifyOtp";
 import Properties from "@/pages/Properties";
 import PropertyDetail from "@/pages/PropertyDetail";
+import MapSearch from "@/pages/MapSearch";
 import Messages from "@/pages/Messages";
 import Admin from "@/pages/Admin";
 
@@ -29,6 +30,7 @@ export const AppRouter = () => {
         {/* ✅ PROPERTY PAGES */}
         <Route path="/properties" element={<Properties />} />
         <Route path="/property/:id" element={<PropertyDetail />} />
+        <Route path="/map" element={<MapSearch />} />
 
         {/* ✅ PROTECTED PAGES */}
         <Route

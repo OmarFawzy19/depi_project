@@ -5,14 +5,14 @@ const {
     addFavorite,
     removeFavorite,
     getFavorites
-} = require("../controllers/favoriteController");
+} = require("../controllers/FavoriteController");
 
-const { protect } = require("../middleware/authMiddleware");
+const auth = require("../middleware/auth");
 
-router.post("/:propertyId",protect,addFavorite);
+router.post("/:propertyId",auth,addFavorite);
 
-router.delete("/:propertyId",protect,removeFavorite);
+router.delete("/:propertyId",auth,removeFavorite);
 
-router.get("/",protect,getFavorites);
+router.get("/",auth,getFavorites);
 
 module.exports = router;

@@ -26,6 +26,8 @@ app.use(rateLimiter);
 const authRoutes = require("./routes/authRoute");
 const propertyRoutes = require("./routes/propertyRoute");
 const adminRoutes = require("./routes/adminRoute");
+const favoriteRoutes = require("./routes/favoriteRoutes");
+const enquiryRoutes = require("./routes/enquiryRoutes");
 const auth = require("./middleware/auth");
 
 app.use("/api/auth", authRoutes);
@@ -39,6 +41,13 @@ app.use("/api/enquiries", enquiryRoutes);
 // =======================
 app.get("/api/test", auth, (req, res) => {
   res.json({ msg: "Protected works", user: req.user });
+});
+
+// =======================
+// TEST ROUTE
+// =======================
+app.get("/", (req, res) => {
+  res.json({ status: "ok" });
 });
 
 // =======================
@@ -62,19 +71,7 @@ mongoose
   .catch((err) => console.log(err));
 
 // =======================
-// TEST ROUTE
-// =======================
-app.get("/", (req, res) => {
-  res.json({ status: "ok" });
-});
-
-// =======================
 // SERVER
 // =======================
 const PORT = 5000;
 app.listen(PORT, () => console.log("Server running on port 5000 🚀"));
-
-
-// favs part 
-const favoriteRoutes = require("./routes/favoriteRoutes");
-const enquiryRoutes = require("./routes/enquiryRoutes");

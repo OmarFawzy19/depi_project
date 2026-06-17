@@ -5,14 +5,14 @@ const {
     sendEnquiry,
     ownerEnquiries,
     seekerEnquiries
-} = require("../controllers/enquiryController");
+} = require("../controllers/EnquiryController");
 
-const { protect } = require("../middleware/authMiddleware");
+const auth = require("../middleware/auth");
 
-router.post("/:propertyId",protect,sendEnquiry);
+router.post("/:propertyId",auth,sendEnquiry);
 
-router.get("/owner",protect,ownerEnquiries);
+router.get("/owner",auth,ownerEnquiries);
 
-router.get("/seeker",protect,seekerEnquiries);
+router.get("/seeker",auth,seekerEnquiries);
 
 module.exports = router;
