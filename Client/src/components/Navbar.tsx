@@ -73,13 +73,9 @@ const handleLogout = () => {
           {user.name}
         </div>
 
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={handleLogout}
-        >
-          Logout
-        </Button>
+        <Button size="sm" onClick={handleLogout}>
+  Logout
+</Button>
       </>
     )}
   </div>
