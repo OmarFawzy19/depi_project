@@ -30,22 +30,43 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user)
-      return res.status(400).json({ error: "Invalid credentials" });
+
+    if (!user) {
+      return res.status(404).json({
+        error: "No account found with this email."
+      });
+    }
 
     const isMatch = await user.comparePassword(password);
-    if (!isMatch)
-      return res.status(400).json({ error: "Invalid credentials" });
 
+    if (!isMatch) {
+      return res.status(401).json({
+        error: "Incorrect password."
+      });
+    }
+
+    // ✅ Generate JWT
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      {
+        id: user._id,
+        role: user.role,
+      },
       "secretkey",
-      { expiresIn: "7d" }
+      {
+        expiresIn: "7d",
+      }
     );
 
-    res.json({ token, user });
+    // ✅ Return token and user
+    res.json({
+      token,
+      user,
+    });
+
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      error: err.message,
+    });
   }
 };
 
