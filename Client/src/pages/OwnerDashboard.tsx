@@ -4,7 +4,7 @@ import {
   Plus,
   Home,
   Eye,
-  MessageSquare,
+  Mail,
   MapPin,
   Bed,
   Bath,
@@ -100,7 +100,7 @@ const OwnerDashboard = () => {
   const stats = [
     { icon: Home, label: "My listings", value: properties.length },
     { icon: Eye, label: "Total views", value: "1,284" },
-    { icon: MessageSquare, label: "Inquiries", value: 12 },
+    { icon: Mail, label: "Inquiries", value: 12 },
   ];
 
   return (

@@ -1,57 +1,54 @@
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosClient from "@/lib/axiosClient";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 const ResetPassword = () => {
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleReset = async (e: any) => {
+  const handleReset = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const email = localStorage.getItem("resetEmail");
 
     if (!email) {
-      alert("No email found ❌");
+      alert("No email found");
       return;
     }
 
     try {
-      // ✅ verify OTP
       await axiosClient.post("/auth/verify-otp", {
         email,
         otp: otp.trim(),
       });
 
-      // ✅ reset password
       await axiosClient.post("/auth/reset-password", {
         email,
         password,
       });
 
       localStorage.removeItem("resetEmail");
-
-      alert("Password reset successfully ✅");
-
+      alert("Password reset successfully");
       navigate("/login");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      alert(err.response?.data?.error || "Something went wrong ❌");
+      alert(getErrorMessage(err, "Something went wrong"));
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <form onSubmit={handleReset} className="flex flex-col gap-4 w-80">
-        <h2 className="text-xl font-bold text-center">Reset Password</h2>
+    <div className="flex min-h-screen items-center justify-center">
+      <form onSubmit={handleReset} className="flex w-80 flex-col gap-4">
+        <h2 className="text-center text-xl font-bold">Reset Password</h2>
 
         <input
           type="text"
           placeholder="Enter OTP"
           value={otp}
           onChange={(e) => setOtp(e.target.value)}
-          className="border p-2 rounded"
+          className="rounded border p-2"
           required
         />
 
@@ -60,13 +57,11 @@ const ResetPassword = () => {
           placeholder="New Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="border p-2 rounded"
+          className="rounded border p-2"
           required
         />
 
-        <button className="bg-green-500 text-white p-2 rounded">
-          Reset Password
-        </button>
+        <button className="rounded bg-green-500 p-2 text-white">Reset Password</button>
       </form>
     </div>
   );

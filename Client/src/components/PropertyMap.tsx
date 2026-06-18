@@ -67,14 +67,27 @@ export function PropertyMap({
   const pickMarkerRef = useRef<L.Marker | null>(null);
 
   const onBoundsChangeRef = useRef(onBoundsChange);
+  const onSelectRef = useRef(onSelect);
+  const selectableRef = useRef(selectable);
+  const initialCenterRef = useRef<[number, number] | null>(null);
+  const zoomRef = useRef(zoom);
+
   useEffect(() => {
     onBoundsChangeRef.current = onBoundsChange;
   }, [onBoundsChange]);
 
+  useEffect(() => {
+    onSelectRef.current = onSelect;
+  }, [onSelect]);
+
+  useEffect(() => {
+    selectableRef.current = selectable;
+  }, [selectable]);
+
   const validProperties = useMemo(() => {
     return (properties || []).filter((p) => isValidPoint(p.lat, p.lng)).map((p) => ({
       ...p,
-      id: (p as any).id ?? (p as any)._id,
+      id: p.id,
     }));
   }, [properties]);
 
@@ -92,13 +105,17 @@ export function PropertyMap({
     return [30.0444, 31.2357];
   }, [center, userLocation, validProperties]);
 
+  if (!initialCenterRef.current) {
+    initialCenterRef.current = initialCenter;
+  }
+
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
     const map = L.map(containerRef.current, {
       zoomControl: true,
       scrollWheelZoom: true,
-    }).setView(initialCenter, zoom);
+    }).setView(initialCenterRef.current, zoomRef.current);
 
     L.tileLayer(
       "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
@@ -110,18 +127,18 @@ export function PropertyMap({
 
     mapRef.current = map;
 
-    const cluster = (L as any).markerClusterGroup({
+    const cluster = L.markerClusterGroup({
       showCoverageOnHover: false,
     });
 
     cluster.addTo(map);
     clusterRef.current = cluster;
 
-    if (selectable) {
-      map.on("click", (e: L.LeafletMouseEvent) => {
-        onSelect?.(e.latlng.lat, e.latlng.lng);
-      });
-    }
+    map.on("click", (e: L.LeafletMouseEvent) => {
+      if (selectableRef.current) {
+        onSelectRef.current?.(e.latlng.lat, e.latlng.lng);
+      }
+    });
 
     map.on("moveend", () => {
       if (onBoundsChangeRef.current) {

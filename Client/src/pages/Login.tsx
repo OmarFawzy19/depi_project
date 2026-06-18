@@ -1,9 +1,10 @@
+import { type FormEvent, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { MapPin, Mail, Lock } from "lucide-react";
+import { Lock, Mail, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -25,8 +26,7 @@ const Login = () => {
     }
   }, [location.state, toast]);
 
-  // 🔥 HANDLE LOGIN
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
@@ -34,11 +34,11 @@ const Login = () => {
       const state = location.state as { from?: { pathname?: string } } | null;
       const from = state?.from?.pathname ?? "/home";
       navigate(from, { replace: true });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       toast({
         title: "Login failed",
-        description: err?.toString() ?? "Unable to sign in.",
+        description: getErrorMessage(err, "Unable to sign in."),
         variant: "destructive",
       });
     }
@@ -55,14 +55,11 @@ const Login = () => {
             <span className="font-heading text-2xl font-bold">Makany</span>
           </Link>
           <h1 className="mt-4 font-heading text-2xl font-bold">Welcome back</h1>
-          
-          <p className="mt-1 text-sm text-muted-foreground">
-            Sign in to your account
-          </p>
+
+          <p className="mt-1 text-sm text-muted-foreground">Sign in to your account</p>
         </div>
 
         <div className="rounded-2xl bg-card p-8 shadow-card">
-          {/* 🔥 CHANGE HERE */}
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
             <div>
               <label className="mb-1 block text-sm font-medium">Email</label>
@@ -84,7 +81,7 @@ const Login = () => {
                 <Lock className="h-4 w-4 text-muted-foreground" />
                 <input
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full bg-transparent text-sm focus:outline-none"
@@ -99,9 +96,7 @@ const Login = () => {
 
           <div className="mt-6 flex items-center gap-3">
             <div className="h-px flex-1 bg-border" />
-            <span className="text-xs text-muted-foreground">
-              or continue with
-            </span>
+            <span className="text-xs text-muted-foreground">or continue with</span>
             <div className="h-px flex-1 bg-border" />
           </div>
 
@@ -115,18 +110,19 @@ const Login = () => {
             Google
           </Button>
         </div>
-<p className="text-sm text-center mt-2">
-  <Link to="/forgot-password" className="text-primary hover:underline">
-    Forgot Password?
-  </Link>
-</p>
 
-<p className="mt-6 text-center text-sm text-muted-foreground">
-  Don't have an account?{" "}
-  <Link to="/register" className="font-semibold text-primary hover:underline">
-    Sign up
-  </Link>
-</p>
+        <p className="mt-2 text-center text-sm">
+          <Link to="/forgot-password" className="text-primary hover:underline">
+            Forgot Password?
+          </Link>
+        </p>
+
+        <p className="mt-6 text-center text-sm text-muted-foreground">
+          Don't have an account?{" "}
+          <Link to="/register" className="font-semibold text-primary hover:underline">
+            Sign up
+          </Link>
+        </p>
       </div>
     </div>
   );

@@ -1,39 +1,45 @@
-import { useState } from "react";
-import axiosClient from "@/lib/axiosClient";
+import { type FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axiosClient from "@/lib/axiosClient";
+
+interface TempUser {
+  email?: string;
+  [key: string]: unknown;
+}
 
 const VerifyOtp = () => {
   const [otp, setOtp] = useState("");
   const navigate = useNavigate();
 
-  const handleVerify = async (e: any) => {
+  const handleVerify = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const tempUser = JSON.parse(localStorage.getItem("tempUser") || "{}");
+    const tempUser = JSON.parse(localStorage.getItem("tempUser") || "{}") as TempUser;
+
+    if (!tempUser.email) {
+      alert("No pending account found");
+      return;
+    }
 
     try {
-      // 🔥 verify OTP
       await axiosClient.post("/auth/verify-otp", {
         email: tempUser.email,
         otp: otp.trim(),
       });
 
-      // ✅ AFTER success → register
       await axiosClient.post("/auth/register", tempUser);
 
       localStorage.removeItem("tempUser");
-
-      alert("Account created ✅");
-
-      navigate("/Home"); // 🔥 go to home
-    } catch (err) {
+      alert("Account created");
+      navigate("/home");
+    } catch (err: unknown) {
       console.error(err);
-      alert("Invalid OTP ❌");
+      alert("Invalid OTP");
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex min-h-screen items-center justify-center">
       <form onSubmit={handleVerify} className="flex flex-col gap-4">
         <h2>Enter OTP</h2>
         <input

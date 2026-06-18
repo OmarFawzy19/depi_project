@@ -1,33 +1,54 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
 import axiosClient from "@/lib/axiosClient";
+import { getErrorMessage } from "@/lib/errorMessage";
 
-const AuthContext = createContext<any>(null);
+interface AuthUser {
+  id?: string;
+  _id?: string;
+  name: string;
+  email: string;
+  role?: string;
+  avatar?: string;
+  phone?: string;
+}
 
-export const AuthProvider = ({ children }: any) => {
-  const [user, setUser] = useState<any>(() => {
-    try {
-      return JSON.parse(localStorage.getItem("user") ?? "null");
-    } catch {
-      return null;
-    }
-  });
+interface LoginResponse {
+  token: string;
+  user: AuthUser;
+}
+
+interface AuthContextValue {
+  user: AuthUser | null;
+  login: (email: string, password: string) => Promise<LoginResponse>;
+  logout: () => void;
+}
+
+const AuthContext = createContext<AuthContextValue | null>(null);
+
+const readStoredUser = (): AuthUser | null => {
+  try {
+    return JSON.parse(localStorage.getItem("user") ?? "null") as AuthUser | null;
+  } catch {
+    return null;
+  }
+};
+
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<AuthUser | null>(readStoredUser);
 
   useEffect(() => {
     if (!user) {
-      try {
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
-        }
-      } catch {
-        localStorage.removeItem("user");
+      const storedUser = readStoredUser();
+
+      if (storedUser) {
+        setUser(storedUser);
       }
     }
   }, [user]);
 
   const login = async (email: string, password: string) => {
     try {
-      const res = await axiosClient.post("/auth/login", {
+      const res = await axiosClient.post<LoginResponse>("/auth/login", {
         email,
         password,
       });
@@ -36,12 +57,11 @@ export const AuthProvider = ({ children }: any) => {
       localStorage.setItem("user", JSON.stringify(res.data.user));
       setUser(res.data.user);
 
-      return res.data; // ✅ IMPORTANT
-    } catch (err: any) {
-      console.error("LOGIN ERROR:", err.response?.data || err.message);
-
-      // 🔥 THIS WILL SHOW REAL ERROR
-      throw err.response?.data?.error || "Login failed";
+      return res.data;
+    } catch (err: unknown) {
+      const message = getErrorMessage(err, "Login failed");
+      console.error("LOGIN ERROR:", message);
+      throw message;
     }
   };
 
@@ -51,11 +71,15 @@ export const AuthProvider = ({ children }: any) => {
     setUser(null);
   };
 
-  return (
-    <AuthContext.Provider value={{ user, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, login, logout }}>{children}</AuthContext.Provider>;
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+
+  return context;
+};

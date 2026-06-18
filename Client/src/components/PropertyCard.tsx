@@ -15,7 +15,7 @@ interface PropertyCardProps {
 }
 
 export function PropertyCard({ property, index = 0, distance, isOwner = false, onDelete }: PropertyCardProps) {
-  const propertyId = (property as any).id ?? (property as any)._id ?? "";
+  const propertyId = property.id;
   const propertyImage = property.images?.[0] ?? "/placeholder.svg";
   return (
     <motion.div

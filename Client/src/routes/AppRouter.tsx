@@ -12,7 +12,6 @@ import Properties from "@/pages/Properties";
 import PropertyDetail from "@/pages/PropertyDetail";
 import MapSearch from "@/pages/MapSearch";
 import FavoritesPage from "@/pages/FavoritesPage";
-import Messages from "@/pages/Messages";
 import Admin from "@/pages/Admin";
 import OwnerDashboard from "@/pages/OwnerDashboard";
 import EditProperty from "@/pages/EditProperty";
@@ -43,15 +42,8 @@ export const AppRouter = () => {
           }
         />
 
-        <Route          path="/messages"
-          element={
-            <ProtectedRoute>
-              <Messages />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route          path="/add-property"
+        <Route
+          path="/add-property"
           element={
             <ProtectedRoute>
               <AddProperty />
@@ -84,7 +76,6 @@ export const AppRouter = () => {
           }
         />
 
-        <Route path="/messages" element={<Messages />} />
         <Route path="/admin" element={<Admin />} />
       </Routes>
     </BrowserRouter>

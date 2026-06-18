@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Heart, MessageSquare, Search, Plus, Navigation, Loader2 } from "lucide-react";
+import { Heart, Search, Plus, Navigation, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -41,10 +41,9 @@ const Dashboard = () => {
           </div>
         </motion.div>
 
-        <div className="mb-8 grid gap-4 sm:grid-cols-3">
+        <div className="mb-8 grid gap-4 sm:grid-cols-2">
           {[
             { icon: Heart, label: "Saved", value: saved.length, to: "/favorites" },
-            { icon: MessageSquare, label: "Messages", value: 4, to: "/messages" },
             { icon: Search, label: "Searches", value: recentSearches.length, to: "/properties" },
           ].map((s) => (
             <Link key={s.label} to={s.to} className="rounded-2xl bg-card p-5 shadow-card transition hover:shadow-card-hover">

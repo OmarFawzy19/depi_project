@@ -1,24 +1,24 @@
+import { type FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { MapPin, Mail, Lock, User } from "lucide-react";
+import { Lock, Mail, MapPin, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import axiosClient from "@/lib/axiosClient";
 import { useAuth } from "@/hooks/AuthContext";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 const Register = () => {
-  const navigate = useNavigate(); // ✅ ADD
+  const navigate = useNavigate();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const { login } = useAuth(); // 🔥 Get login function from AuthContext
+  const { login } = useAuth();
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
-      // 🔥 Step 1: Direct registration without sending OTP
       await axiosClient.post("/auth/register", {
         name,
         email,
@@ -26,16 +26,16 @@ const Register = () => {
         role: "seeker",
       });
 
-      // 🔥 Step 2: Automatically log in the user to set state/token
       await login(email, password);
 
-      alert("Account created successfully! ✅");
+      alert("Account created successfully!");
       navigate("/home");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      alert(err.response?.data?.error || "Error creating account ❌");
+      alert(getErrorMessage(err, "Error creating account"));
     }
   };
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
@@ -47,13 +47,10 @@ const Register = () => {
             <span className="font-heading text-2xl font-bold">Makany</span>
           </Link>
           <h1 className="mt-4 font-heading text-2xl font-bold">Create an account</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Join Makany to find your perfect place
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">Join Makany to find your perfect place</p>
         </div>
 
         <div className="rounded-2xl bg-card p-8 shadow-card">
-          {/* ✅ FIXED HERE */}
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
             <div>
               <label className="mb-1 block text-sm font-medium">Full Name</label>
