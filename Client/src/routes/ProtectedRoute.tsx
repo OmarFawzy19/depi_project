@@ -1,15 +1,19 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/AuthContext";
 
-const ProtectedRoute = ({ children }: any) => {
+type ProtectedRouteProps = {
+  children: React.ReactNode;
+};
+
+const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user } = useAuth();
 
-  // ❌ not logged in
-  if (!user) {
+  const token = localStorage.getItem("token");
+
+  if (!user && !token) {
     return <Navigate to="/login" replace />;
   }
 
-  // ✅ logged in
   return children;
 };
 

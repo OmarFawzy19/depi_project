@@ -46,7 +46,7 @@ const propertySchema = new mongoose.Schema({
   // ───────────── Status & Ownership ─────────────
   status: {
     type: String,
-    enum: ["pending", "approved", "rejected"],
+    enum: ["pending", "approved", "rejected", "paused"],
     default: "pending",
   },
   owner: {

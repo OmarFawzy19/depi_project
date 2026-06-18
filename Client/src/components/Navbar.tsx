@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { MapPin, Menu, X, Heart, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/hooks/AuthContext";
 
 const navLinks = [
   { label: "Home", path: "/" },
@@ -16,6 +17,13 @@ const navLinks = [
 export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const { user } = useAuth();
+
+  const isOwner = user?.role === "owner";
+
+  const links = isOwner
+    ? [...navLinks, { label: "Owner Dashboard", path: "/owner-dashboard" }]
+    : navLinks;
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl">
@@ -24,11 +32,13 @@ export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-primary shadow-glow">
             <MapPin className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="font-heading text-xl font-bold text-gradient">Makany</span>
+          <span className="font-heading text-xl font-bold text-gradient">
+            Makany
+          </span>
         </Link>
 
         <div className="hidden items-center gap-1 md:flex">
-          {navLinks.map((link) => (
+          {links.map((link) => (
             <Link
               key={link.path}
               to={link.path}
@@ -51,7 +61,9 @@ export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
               </Button>
             </Link>
             <Link to="/login">
-              <Button variant="outline" size="sm">Log in</Button>
+              <Button variant="outline" size="sm">
+                Log in
+              </Button>
             </Link>
             <Link to="/register">
               <Button size="sm">Sign up</Button>

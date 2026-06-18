@@ -2,17 +2,17 @@ const express = require("express");
 const router = express.Router();
 
 const {
-    sendEnquiry,
-    ownerEnquiries,
-    seekerEnquiries
+  sendEnquiry,
+  ownerEnquiries,
+  seekerEnquiries,
 } = require("../controllers/enquiryController");
 
-const { protect } = require("../middleware/authMiddleware");
+const protect = require("../middleware/auth");
 
-router.post("/:propertyId",protect,sendEnquiry);
+router.post("/:propertyId", protect, sendEnquiry);
 
-router.get("/owner",protect,ownerEnquiries);
+router.get("/owner", protect, ownerEnquiries);
 
-router.get("/seeker",protect,seekerEnquiries);
+router.get("/seeker", protect, seekerEnquiries);
 
 module.exports = router;
