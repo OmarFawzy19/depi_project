@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import Dashboard from "@/pages/Dashboard";
@@ -11,16 +10,13 @@ import ResetPassword from "@/pages/ResetPassword";
 import VerifyOtp from "@/pages/VerifyOtp";
 import Properties from "@/pages/Properties";
 import PropertyDetail from "@/pages/PropertyDetail";
-<<<<<<< HEAD
-import AddProperty from "@/pages/AddProperty";
-=======
 import MapSearch from "@/pages/MapSearch";
 import FavoritesPage from "@/pages/FavoritesPage";
->>>>>>> 6a735498c3f3b39d329445285c2f12b5a74b380a
 import Messages from "@/pages/Messages";
 import Admin from "@/pages/Admin";
 import OwnerDashboard from "@/pages/OwnerDashboard";
 import EditProperty from "@/pages/EditProperty";
+import AddProperty from "@/pages/AddProperty";
 
 export const AppRouter = () => {
   return (
@@ -47,8 +43,15 @@ export const AppRouter = () => {
           }
         />
 
-        <Route
-          path="/add-property"
+        <Route          path="/messages"
+          element={
+            <ProtectedRoute>
+              <Messages />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route          path="/add-property"
           element={
             <ProtectedRoute>
               <AddProperty />

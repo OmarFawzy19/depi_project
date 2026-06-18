@@ -1,47 +1,22 @@
-<<<<<<< HEAD
-import { Heart, MapPin, Bed, Bath, Maximize, Edit, Trash2 } from "lucide-react";
-=======
-import { MapPin, Bed, Bath, Maximize, Navigation2 } from "lucide-react";
->>>>>>> 6a735498c3f3b39d329445285c2f12b5a74b380a
+import { MapPin, Bed, Bath, Maximize, Navigation2, Edit, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import type { Property } from "@/services/propertyService";
 import { Badge } from "@/components/ui/badge";
-<<<<<<< HEAD
-import { Button } from "@/components/ui/button";
-=======
 import { FavoriteButton } from "@/components/FavoriteButton";
->>>>>>> 6a735498c3f3b39d329445285c2f12b5a74b380a
+import { Button } from "@/components/ui/button";
 
 interface PropertyCardProps {
   property: Property;
   index?: number;
-<<<<<<< HEAD
+  distance?: number | null;
   isOwner?: boolean;
   onDelete?: (id: string) => void;
 }
 
-export function PropertyCard({
-  property,
-  index = 0,
-  isOwner = false,
-  onDelete,
-}: PropertyCardProps) {
-  const [liked, setLiked] = useState(false);
-
-  const propertyImage =
-    property.images?.[0] && property.images[0] !== "/placeholder.svg"
-      ? property.images[0]
-      : "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop";
-
-  const propertyId = property.id;
-
-=======
-  distance?: number | null;
-}
-
-export function PropertyCard({ property, index = 0, distance }: PropertyCardProps) {
->>>>>>> 6a735498c3f3b39d329445285c2f12b5a74b380a
+export function PropertyCard({ property, index = 0, distance, isOwner = false, onDelete }: PropertyCardProps) {
+  const propertyId = (property as any).id ?? (property as any)._id ?? "";
+  const propertyImage = property.images?.[0] ?? "/placeholder.svg";
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -68,28 +43,7 @@ export function PropertyCard({ property, index = 0, distance }: PropertyCardProp
               For {property.priceType === "rent" ? "Rent" : "Sale"}
             </Badge>
           </div>
-<<<<<<< HEAD
-
-          {!isOwner && (
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                setLiked(!liked);
-              }}
-              className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-card/80 backdrop-blur-sm transition-colors hover:bg-card"
-            >
-              <Heart
-                className={`h-4 w-4 transition-colors ${
-                  liked
-                    ? "fill-destructive text-destructive"
-                    : "text-muted-foreground"
-                }`}
-              />
-            </button>
-          )}
-=======
-          <FavoriteButton propertyId={property.id} className="absolute right-3 top-3 h-12 w-12" />
->>>>>>> 6a735498c3f3b39d329445285c2f12b5a74b380a
+          <FavoriteButton propertyId={propertyId} className="absolute right-3 top-3 h-12 w-12" />
         </div>
 
         <div className="p-4">

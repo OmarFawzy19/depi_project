@@ -138,22 +138,7 @@ const PropertyDetail = () => {
               </div>
 
               <div className="flex gap-2">
-<<<<<<< HEAD
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setLiked(!liked)}
-                >
-                  <Heart
-                    className={`h-4 w-4 ${
-                      liked ? "fill-destructive text-destructive" : ""
-                    }`}
-                  />
-                </Button>
-
-=======
                 <FavoriteButton propertyId={property.id} />
->>>>>>> 6a735498c3f3b39d329445285c2f12b5a74b380a
                 <Button variant="outline" size="icon">
                   <Share2 className="h-4 w-4" />
                 </Button>

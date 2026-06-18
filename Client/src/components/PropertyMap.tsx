@@ -66,16 +66,17 @@ export function PropertyMap({
   const userCircleRef = useRef<L.Circle | null>(null);
   const pickMarkerRef = useRef<L.Marker | null>(null);
 
-<<<<<<< HEAD
-  const validProperties = useMemo(() => {
-    return properties.filter((p) => isValidPoint(p.lat, p.lng));
-  }, [properties]);
-=======
   const onBoundsChangeRef = useRef(onBoundsChange);
   useEffect(() => {
     onBoundsChangeRef.current = onBoundsChange;
   }, [onBoundsChange]);
->>>>>>> 6a735498c3f3b39d329445285c2f12b5a74b380a
+
+  const validProperties = useMemo(() => {
+    return (properties || []).filter((p) => isValidPoint(p.lat, p.lng)).map((p) => ({
+      ...p,
+      id: (p as any).id ?? (p as any)._id,
+    }));
+  }, [properties]);
 
   const initialCenter: [number, number] = useMemo(() => {
     if (center) return center;

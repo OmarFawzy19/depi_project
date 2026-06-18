@@ -1,17 +1,29 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { MapPin, Mail, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { useAuth } from "@/hooks/AuthContext"; // 🔥 ADD THIS
-import { useNavigate } from "react-router-dom"; // 🔥 ADD THIS
-import Home from "@/pages/Home"; // 🔥 ADD THIS
+import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const { login } = useAuth(); // 🔥
-  const navigate = useNavigate(); // 🔥
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const state = location.state as { authMessage?: string } | null;
+    if (state?.authMessage) {
+      toast({
+        title: state.authMessage,
+        description: "Please login to continue.",
+        variant: "destructive",
+      });
+    }
+  }, [location.state, toast]);
 
   // 🔥 HANDLE LOGIN
   const handleSubmit = async (e: any) => {
@@ -19,12 +31,16 @@ const Login = () => {
 
     try {
       await login(email, password);
-      navigate("/home"); // 🔥 redirect after login
-    }
-      catch (err: any) {
-  console.error(err);
-  alert(err); // 🔥 show real message instead of "Login failed"
-
+      const state = location.state as { from?: { pathname?: string } } | null;
+      const from = state?.from?.pathname ?? "/home";
+      navigate(from, { replace: true });
+    } catch (err: any) {
+      console.error(err);
+      toast({
+        title: "Login failed",
+        description: err?.toString() ?? "Unable to sign in.",
+        variant: "destructive",
+      });
     }
   };
 

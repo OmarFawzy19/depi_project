@@ -11,12 +11,27 @@ export default function useFavorites() {
     const [favorites, setFavorites] = useState<Favorite[]>([]);
 
     useEffect(() => {
+        if (!localStorage.getItem("token")) {
+            setFavorites([]);
+            return;
+        }
+
         loadFavorites();
     }, []);
 
     const loadFavorites = async (): Promise<void> => {
-        const res = await favoriteService.getFavorites();
-        setFavorites(res.data);
+        if (!localStorage.getItem("token")) {
+            setFavorites([]);
+            return;
+        }
+
+        try {
+            const res = await favoriteService.getFavorites();
+            setFavorites(res.data);
+        } catch (error) {
+            console.warn("Unable to load favorites", error);
+            setFavorites([]);
+        }
     };
 
     return {

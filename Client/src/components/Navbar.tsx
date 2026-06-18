@@ -18,15 +18,6 @@ export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const { user } = useAuth();
-<<<<<<< HEAD
-
-  const isOwner = user?.role === "owner";
-
-  const links = isOwner
-    ? [...navLinks, { label: "Owner Dashboard", path: "/owner-dashboard" }]
-    : navLinks;
-=======
->>>>>>> 6a735498c3f3b39d329445285c2f12b5a74b380a
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl">
@@ -41,7 +32,7 @@ export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
         </Link>
 
         <div className="hidden items-center gap-1 md:flex">
-          {links.map((link) => (
+          {navLinks.map((link) => (
             <Link
               key={link.path}
               to={link.path}

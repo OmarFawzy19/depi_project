@@ -58,10 +58,7 @@
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.61.1",
-<<<<<<< HEAD
-=======
     "react-leaflet": "^4.2.1",
->>>>>>> 6a735498c3f3b39d329445285c2f12b5a74b380a
     "react-resizable-panels": "^2.1.9",
     "react-router-dom": "^6.30.1",
     "recharts": "^2.15.4",
