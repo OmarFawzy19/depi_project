@@ -11,7 +11,12 @@ import ResetPassword from "@/pages/ResetPassword";
 import VerifyOtp from "@/pages/VerifyOtp";
 import Properties from "@/pages/Properties";
 import PropertyDetail from "@/pages/PropertyDetail";
+<<<<<<< HEAD
 import AddProperty from "@/pages/AddProperty";
+=======
+import MapSearch from "@/pages/MapSearch";
+import FavoritesPage from "@/pages/FavoritesPage";
+>>>>>>> 6a735498c3f3b39d329445285c2f12b5a74b380a
 import Messages from "@/pages/Messages";
 import Admin from "@/pages/Admin";
 import OwnerDashboard from "@/pages/OwnerDashboard";
@@ -32,6 +37,15 @@ export const AppRouter = () => {
 
         <Route path="/properties" element={<Properties />} />
         <Route path="/property/:id" element={<PropertyDetail />} />
+        <Route path="/map" element={<MapSearch />} />
+        <Route
+          path="/favorites"
+          element={
+            <ProtectedRoute>
+              <FavoritesPage />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/add-property"

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Search, SlidersHorizontal, Grid3X3, Map, Navigation, Loader2 } from "lucide-react";
+import { Search, SlidersHorizontal, Grid3X3, Map, Navigation, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -23,6 +23,7 @@ const Properties = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [radius, setRadius] = useState<string>("");
   const { location, loading: geoLoading, request: requestLocation } = useGeolocation();
+  const [mapPosition, setMapPosition] = useState<{ lat: number; lng: number; radiusKm: number } | null>(null);
 
   // Debounce search input — waits 300ms after user stops typing
   const debouncedSearch = useDebounce(search, 300);
@@ -57,6 +58,31 @@ const Properties = () => {
 
     return () => { alive = false; };
   }, [debouncedSearch, typeFilter, priceFilter, bedroomsFilter]);
+
+  // Dynamically load properties in the visible map area as the user pans/zooms
+  useEffect(() => {
+    if (viewMode !== "map" || !mapPosition) return;
+
+    let alive = true;
+    // Cap query radius between 1km and 50km
+    const queryRadius = Math.max(1, Math.min(mapPosition.radiusKm, 50));
+    propertyService
+      .nearby(mapPosition.lat, mapPosition.lng, queryRadius)
+      .then((results) => {
+        if (!alive) return;
+        setApiData((prev) => {
+          const propertyMap = new Map<string, Property>();
+          prev.forEach((p) => propertyMap.set(p.id, p));
+          results.forEach((p) => propertyMap.set(p.id, p));
+          return Array.from(propertyMap.values());
+        });
+      })
+      .catch(() => {});
+
+    return () => {
+      alive = false;
+    };
+  }, [mapPosition, viewMode]);
 
   // Client-side: radius filter + sorting
   const filtered = useMemo(() => {
@@ -229,16 +255,71 @@ const Properties = () => {
           </motion.div>
         )}
 
+        {/* Active filter chips */}
+        {(() => {
+          const chips: { label: string; onRemove: () => void }[] = [];
+          if (typeFilter) chips.push({ label: `Type: ${typeFilter}`, onRemove: () => setTypeFilter("") });
+          if (priceFilter) {
+            const [min, max] = priceFilter.split("-").map(Number);
+            const label = max >= 99999999 ? `$${(min/1000).toFixed(0)}k+` : `$${(min/1000).toFixed(0)}k – $${(max/1000).toFixed(0)}k`;
+            chips.push({ label: `Price: ${label}`, onRemove: () => setPriceFilter("") });
+          }
+          if (bedroomsFilter) chips.push({ label: `${bedroomsFilter}+ beds`, onRemove: () => setBedroomsFilter("") });
+          if (radius && location) chips.push({ label: `Within ${radius} km`, onRemove: () => setRadius("") });
+          if (debouncedSearch) chips.push({ label: `"${debouncedSearch}"`, onRemove: () => setSearch("") });
+
+          if (chips.length === 0) return null;
+          return (
+            <div className="mb-6 flex flex-wrap gap-2">
+              {chips.map((c) => (
+                <span
+                  key={c.label}
+                  className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
+                >
+                  {c.label}
+                  <button
+                    onClick={c.onRemove}
+                    className="ml-0.5 rounded-full p-0.5 hover:bg-primary/20 transition-colors"
+                    aria-label={`Remove filter: ${c.label}`}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              ))}
+              <button
+                onClick={() => { setTypeFilter(""); setPriceFilter(""); setBedroomsFilter(""); setRadius(""); setSearch(""); }}
+                className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Clear all
+              </button>
+            </div>
+          );
+        })()}
+
         {/* Results */}
         {viewMode === "grid" ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((property, i) => (
-              <PropertyCard key={property.id} property={property} index={i} />
+              <PropertyCard
+                key={property.id}
+                property={property}
+                index={i}
+                distance={
+                  location
+                    ? distanceKm(location, { lat: property.lat, lng: property.lng })
+                    : null
+                }
+              />
             ))}
           </div>
         ) : (
-          <PropertyMap properties={filtered} userLocation={location} height="70vh" />
-        )}
+          <PropertyMap
+            properties={filtered}
+            userLocation={location}
+            height="70vh"
+            onBoundsChange={(center, radiusKm) => setMapPosition({ lat: center.lat, lng: center.lng, radiusKm })}
+          />
+          )}
 
         {filtered.length === 0 && (
           <div className="flex h-60 items-center justify-center">
@@ -250,7 +331,6 @@ const Properties = () => {
           </div>
         )}
       </div>
-
       <Footer />
     </div>
   );

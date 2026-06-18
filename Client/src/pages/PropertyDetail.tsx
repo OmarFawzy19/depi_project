@@ -18,6 +18,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { propertyService, type Property } from "@/services/propertyService";
 import { PropertyCard } from "@/components/PropertyCard";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { PropertyMap } from "@/components/PropertyMap";
@@ -31,7 +32,6 @@ const PropertyDetail = () => {
   const [property, setProperty] = useState<Property | null>(null);
   const [similar, setSimilar] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
-  const [liked, setLiked] = useState(false);
   const { location: userLocation, request: requestLocation } = useGeolocation();
 
   useEffect(() => {
@@ -138,6 +138,7 @@ const PropertyDetail = () => {
               </div>
 
               <div className="flex gap-2">
+<<<<<<< HEAD
                 <Button
                   variant="outline"
                   size="icon"
@@ -150,6 +151,9 @@ const PropertyDetail = () => {
                   />
                 </Button>
 
+=======
+                <FavoriteButton propertyId={property.id} />
+>>>>>>> 6a735498c3f3b39d329445285c2f12b5a74b380a
                 <Button variant="outline" size="icon">
                   <Share2 className="h-4 w-4" />
                 </Button>

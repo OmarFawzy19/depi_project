@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { MapPin, Menu, X, Heart, User } from "lucide-react";
+import { MapPin, Menu, X, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/AuthContext";
@@ -18,12 +18,15 @@ export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const { user } = useAuth();
+<<<<<<< HEAD
 
   const isOwner = user?.role === "owner";
 
   const links = isOwner
     ? [...navLinks, { label: "Owner Dashboard", path: "/owner-dashboard" }]
     : navLinks;
+=======
+>>>>>>> 6a735498c3f3b39d329445285c2f12b5a74b380a
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl">
@@ -53,13 +56,8 @@ export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
           ))}
         </div>
 
-        {!hideAuth && (
+        {!hideAuth && !user && (
           <div className="hidden items-center gap-3 md:flex">
-            <Link to="/favorites">
-              <Button variant="ghost" size="icon">
-                <Heart className="h-5 w-5" />
-              </Button>
-            </Link>
             <Link to="/login">
               <Button variant="outline" size="sm">
                 Log in
