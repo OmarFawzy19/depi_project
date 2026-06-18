@@ -1,6 +1,6 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Lock, Mail, MapPin } from "lucide-react";
+import { Lock, Mail, MapPin, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -9,6 +9,7 @@ import { getErrorMessage } from "@/lib/errorMessage";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -28,6 +29,7 @@ const Login = () => {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
       await login(email, password);
@@ -41,6 +43,8 @@ const Login = () => {
         description: getErrorMessage(err, "Unable to sign in."),
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -55,7 +59,6 @@ const Login = () => {
             <span className="font-heading text-2xl font-bold">Makany</span>
           </Link>
           <h1 className="mt-4 font-heading text-2xl font-bold">Welcome back</h1>
-
           <p className="mt-1 text-sm text-muted-foreground">Sign in to your account</p>
         </div>
 
@@ -71,6 +74,7 @@ const Login = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-transparent text-sm focus:outline-none"
+                  required
                 />
               </div>
             </div>
@@ -85,11 +89,13 @@ const Login = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full bg-transparent text-sm focus:outline-none"
+                  required
                 />
               </div>
             </div>
 
-            <Button type="submit" className="mt-2 w-full" size="lg">
+            <Button type="submit" className="mt-2 w-full gap-2" size="lg" disabled={loading}>
+              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
               Sign in
             </Button>
           </form>
@@ -111,8 +117,8 @@ const Login = () => {
           </Button>
         </div>
 
-        <p className="mt-2 text-center text-sm">
-          <Link to="/forgot-password" className="text-primary hover:underline">
+        <p className="mt-4 text-center text-sm">
+          <Link to="/forgot-password" className="text-primary hover:underline font-medium">
             Forgot Password?
           </Link>
         </p>
