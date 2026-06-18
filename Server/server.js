@@ -25,10 +25,13 @@ const authRoutes = require("./routes/authRoute");
 const propertyRoutes = require("./routes/propertyRoute");
 const adminRoutes = require("./routes/adminRoute");
 const auth = require("./middleware/auth");
+const reportRoutes = require("./routes/reportRoute");
+
 
 app.use("/api/auth", authRoutes);
 app.use("/api/properties", propertyRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/reports", reportRoutes);
 
 // =======================
 // TEST ROUTE (protected)
