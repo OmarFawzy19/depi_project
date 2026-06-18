@@ -6,9 +6,7 @@ const Property = require("../models/Property");
 // ──────────────────────────────────────────
 exports.getProperties = async (req, res) => {
   try {
-    const filter = {
-      status: "approved",
-    };
+    const filter = {};
 
     if (req.query.type) {
       filter.type = req.query.type;
