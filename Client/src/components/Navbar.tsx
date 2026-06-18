@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { MapPin, Menu, X, User } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";import { MapPin, Menu, X, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/AuthContext";
@@ -17,8 +16,12 @@ const navLinks = [
 export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
-  const { user } = useAuth();
-
+  const navigate = useNavigate();
+const { user, logout } = useAuth();
+const handleLogout = () => {
+  logout();
+  navigate("/");
+};
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -47,18 +50,40 @@ export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
           ))}
         </div>
 
-        {!hideAuth && !user && (
-          <div className="hidden items-center gap-3 md:flex">
-            <Link to="/login">
-              <Button variant="outline" size="sm">
-                Log in
-              </Button>
-            </Link>
-            <Link to="/register">
-              <Button size="sm">Sign up</Button>
-            </Link>
-          </div>
-        )}
+        {!hideAuth && (
+  <div className="hidden items-center gap-3 md:flex">
+    {!user ? (
+      <>
+        <Link to="/login">
+          <Button variant="outline" size="sm">
+            Log in
+          </Button>
+        </Link>
+
+        <Link to="/register">
+          <Button size="sm">
+            Sign up
+          </Button>
+        </Link>
+      </>
+    ) : (
+      <>
+        <div className="flex items-center gap-2 text-sm font-medium">
+          <User className="h-4 w-4" />
+          {user.name}
+        </div>
+
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={handleLogout}
+        >
+          Logout
+        </Button>
+      </>
+    )}
+  </div>
+)}
 
         <Button
           variant="ghost"
