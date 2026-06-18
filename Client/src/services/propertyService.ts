@@ -1,9 +1,5 @@
 import axiosClient from "@/lib/axiosClient";
 
-/**
- * Property interface matching the backend Property model.
- * The _id comes from MongoDB, and we alias it as `id` for convenience.
- */
 export interface ApiProperty {
   _id: string;
   title: string;
@@ -19,13 +15,12 @@ export interface ApiProperty {
   longitude: number;
   images: string[];
   features: string[];
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "approved" | "rejected" | "paused";
   owner: { _id: string; name: string; email: string };
   createdAt: string;
-  distance?: number; // only present in /nearby responses
+  distance?: number;
 }
 
-/** Normalized property — maps MongoDB _id to id, and lat/lng field names */
 export interface Property {
   id: string;
   title: string;
@@ -48,7 +43,6 @@ export interface Property {
   distance?: number;
 }
 
-/** Convert API response to the frontend Property shape */
 function normalize(p: ApiProperty): Property {
   return {
     id: p._id,
@@ -63,8 +57,8 @@ function normalize(p: ApiProperty): Property {
     location: p.location,
     lat: p.latitude,
     lng: p.longitude,
-    images: p.images.length > 0 ? p.images : ["/placeholder.svg"],
-    features: p.features,
+    images: p.images?.length > 0 ? p.images : ["/placeholder.svg"],
+    features: p.features ?? [],
     status: p.status,
     owner: {
       name: p.owner?.name ?? "Unknown",
@@ -78,13 +72,11 @@ function normalize(p: ApiProperty): Property {
 }
 
 export const propertyService = {
-  /**
-   * List properties with optional filters.
-   * Maps to GET /api/properties?type=...&minPrice=...&maxPrice=...&bedrooms=...&query=...
-   */
-  async list(filters: Record<string, string | number> = {}): Promise<Property[]> {
-    // Build query string from non-empty filters
+  async list(
+    filters: Record<string, string | number> = {},
+  ): Promise<Property[]> {
     const params = new URLSearchParams();
+
     Object.entries(filters).forEach(([key, val]) => {
       if (val !== "" && val !== undefined && val !== null) {
         params.append(key, String(val));
@@ -93,25 +85,24 @@ export const propertyService = {
 
     const query = params.toString();
     const url = `/properties${query ? `?${query}` : ""}`;
+
     const { data } = await axiosClient.get<ApiProperty[]>(url);
     return data.map(normalize);
   },
 
-  /**
-   * Find properties near a location.
-   * Maps to GET /api/properties/nearby?lat=...&lng=...&radius=...
-   */
-  async nearby(lat: number, lng: number, radius: number): Promise<Property[]> {
-    const { data } = await axiosClient.get<ApiProperty[]>(
-      `/properties/nearby?lat=${lat}&lng=${lng}&radius=${radius}`
-    );
+  async listAll(): Promise<Property[]> {
+    const { data } = await axiosClient.get<ApiProperty[]>("/properties/all");
     return data.map(normalize);
   },
 
-  /**
-   * Get a single property by ID.
-   * Maps to GET /api/properties/:id
-   */
+  async nearby(lat: number, lng: number, radius: number): Promise<Property[]> {
+    const { data } = await axiosClient.get<ApiProperty[]>(
+      `/properties/nearby?lat=${lat}&lng=${lng}&radius=${radius}`,
+    );
+
+    return data.map(normalize);
+  },
+
   async getById(id: string): Promise<Property | undefined> {
     try {
       const { data } = await axiosClient.get<ApiProperty>(`/properties/${id}`);
@@ -121,10 +112,6 @@ export const propertyService = {
     }
   },
 
-  /**
-   * Create a new property (requires auth).
-   * Maps to POST /api/properties
-   */
   async create(payload: Partial<Property>): Promise<Property> {
     const body = {
       title: payload.title,
@@ -141,11 +128,52 @@ export const propertyService = {
       images: payload.images,
       features: payload.features,
     };
+
     const { data } = await axiosClient.post<ApiProperty>("/properties", body);
     return normalize(data);
   },
 
-  async remove(_id: string): Promise<void> {
-    return;
+  async update(id: string, payload: Partial<Property>): Promise<Property> {
+    const body = {
+      title: payload.title,
+      description: payload.description,
+      price: payload.price,
+      priceType: payload.priceType,
+      type: payload.type,
+      bedrooms: payload.bedrooms,
+      bathrooms: payload.bathrooms,
+      area: payload.area,
+      location: payload.location,
+      latitude: payload.lat,
+      longitude: payload.lng,
+      images: payload.images,
+      features: payload.features,
+    };
+
+    const { data } = await axiosClient.put<ApiProperty>(
+      `/properties/${id}`,
+      body,
+    );
+
+    return normalize(data);
+  },
+
+  async togglePause(id: string): Promise<Property> {
+    const { data } = await axiosClient.patch<ApiProperty>(
+      `/properties/${id}/pause`,
+    );
+
+    return normalize(data);
+  },
+
+  async remove(id: string): Promise<void> {
+    await axiosClient.delete(`/properties/${id}`);
+  },
+
+  async listMine(): Promise<Property[]> {
+    const { data } = await axiosClient.get<ApiProperty[]>(
+      "/properties/my/listings",
+    );
+    return data.map(normalize);
   },
 };

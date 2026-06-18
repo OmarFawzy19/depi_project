@@ -1,10 +1,29 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import axiosClient from "@/lib/axiosClient";
 
 const AuthContext = createContext<any>(null);
 
 export const AuthProvider = ({ children }: any) => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<any>(() => {
+    try {
+      return JSON.parse(localStorage.getItem("user") ?? "null");
+    } catch {
+      return null;
+    }
+  });
+
+  useEffect(() => {
+    if (!user) {
+      try {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+      } catch {
+        localStorage.removeItem("user");
+      }
+    }
+  }, [user]);
 
   const login = async (email: string, password: string) => {
     try {
@@ -14,6 +33,7 @@ export const AuthProvider = ({ children }: any) => {
       });
 
       localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
       setUser(res.data.user);
 
       return res.data; // ✅ IMPORTANT
@@ -27,6 +47,7 @@ export const AuthProvider = ({ children }: any) => {
 
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setUser(null);
   };
 

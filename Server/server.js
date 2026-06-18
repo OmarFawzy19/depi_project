@@ -4,15 +4,21 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 
-const app = express();
-
 const logger = require("./middleware/logger");
 const errorHandler = require("./middleware/errorHandler");
 const rateLimiter = require("./middleware/rateLimiter");
 
-// =======================
-// MIDDLEWARE
-// =======================
+const authRoutes = require("./routes/authRoute");
+const propertyRoutes = require("./routes/propertyRoute");
+const adminRoutes = require("./routes/adminRoute");
+const favoriteRoutes = require("./routes/favoriteRoutes");
+const enquiryRoutes = require("./routes/enquiryRoutes");
+const uploadRoute = require("./routes/uploadRoute");
+
+const auth = require("./middleware/auth");
+
+const app = express();
+
 app.use(cors());
 app.use(express.json());
 app.use(logger);
@@ -21,23 +27,25 @@ app.use(rateLimiter);
 // =======================
 // ROUTES
 // =======================
-const authRoutes = require("./routes/authRoute");
-const propertyRoutes = require("./routes/propertyRoute");
-const adminRoutes = require("./routes/adminRoute");
-const auth = require("./middleware/auth");
-const reportRoutes = require("./routes/reportRoute");
-
-
 app.use("/api/auth", authRoutes);
 app.use("/api/properties", propertyRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api/reports", reportRoutes);
+app.use("/api/favorites", favoriteRoutes);
+app.use("/api/enquiries", enquiryRoutes);
+app.use("/api/upload", uploadRoute);
 
 // =======================
 // TEST ROUTE (protected)
 // =======================
 app.get("/api/test", auth, (req, res) => {
   res.json({ msg: "Protected works", user: req.user });
+});
+
+// =======================
+// TEST ROUTE
+// =======================
+app.get("/", (req, res) => {
+  res.json({ status: "ok" });
 });
 
 // =======================
@@ -59,13 +67,6 @@ mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected ✅"))
   .catch((err) => console.log(err));
-
-// =======================
-// TEST ROUTE
-// =======================
-app.get("/", (req, res) => {
-  res.json({ status: "ok" });
-});
 
 // =======================
 // SERVER

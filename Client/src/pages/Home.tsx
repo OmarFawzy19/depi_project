@@ -36,7 +36,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      <Navbar hideAuth />
+      <Navbar />
       {/* Hero */}
       <section className="relative flex min-h-[85vh] items-center overflow-hidden">
         <div className="absolute inset-0">
