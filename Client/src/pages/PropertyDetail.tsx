@@ -6,6 +6,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { propertyService, type Property } from "@/services/propertyService";
 import { PropertyCard } from "@/components/PropertyCard";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { PropertyMap } from "@/components/PropertyMap";
@@ -16,7 +17,6 @@ const PropertyDetail = () => {
   const [property, setProperty] = useState<Property | null>(null);
   const [similar, setSimilar] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
-  const [liked, setLiked] = useState(false);
   const { location: userLocation, request: requestLocation } = useGeolocation();
 
   useEffect(() => {
@@ -111,9 +111,7 @@ const PropertyDetail = () => {
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="icon" onClick={() => setLiked(!liked)}>
-                  <Heart className={`h-4 w-4 ${liked ? "fill-destructive text-destructive" : ""}`} />
-                </Button>
+                <FavoriteButton propertyId={property.id} />
                 <Button variant="outline" size="icon">
                   <Share2 className="h-4 w-4" />
                 </Button>

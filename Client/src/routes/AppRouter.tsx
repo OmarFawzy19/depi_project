@@ -11,6 +11,7 @@ import VerifyOtp from "@/pages/VerifyOtp";
 import Properties from "@/pages/Properties";
 import PropertyDetail from "@/pages/PropertyDetail";
 import MapSearch from "@/pages/MapSearch";
+import FavoritesPage from "@/pages/FavoritesPage";
 import Messages from "@/pages/Messages";
 import Admin from "@/pages/Admin";
 
@@ -31,6 +32,14 @@ export const AppRouter = () => {
         <Route path="/properties" element={<Properties />} />
         <Route path="/property/:id" element={<PropertyDetail />} />
         <Route path="/map" element={<MapSearch />} />
+        <Route
+          path="/favorites"
+          element={
+            <ProtectedRoute>
+              <FavoritesPage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* ✅ PROTECTED PAGES */}
         <Route

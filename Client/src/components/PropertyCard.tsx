@@ -1,9 +1,9 @@
-import { Heart, MapPin, Bed, Bath, Maximize, Navigation2 } from "lucide-react";
+import { MapPin, Bed, Bath, Maximize, Navigation2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useState } from "react";
 import type { Property } from "@/services/propertyService";
 import { Badge } from "@/components/ui/badge";
+import { FavoriteButton } from "@/components/FavoriteButton";
 
 interface PropertyCardProps {
   property: Property;
@@ -12,8 +12,6 @@ interface PropertyCardProps {
 }
 
 export function PropertyCard({ property, index = 0, distance }: PropertyCardProps) {
-  const [liked, setLiked] = useState(false);
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -41,19 +39,7 @@ export function PropertyCard({ property, index = 0, distance }: PropertyCardProp
               For {property.priceType === "rent" ? "Rent" : "Sale"}
             </Badge>
           </div>
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              setLiked(!liked);
-            }}
-            className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-card/80 backdrop-blur-sm transition-colors hover:bg-card"
-          >
-            <Heart
-              className={`h-4 w-4 transition-colors ${
-                liked ? "fill-destructive text-destructive" : "text-muted-foreground"
-              }`}
-            />
-          </button>
+          <FavoriteButton propertyId={property.id} className="absolute right-3 top-3 h-12 w-12" />
         </div>
         <div className="p-4">
           <div className="mb-1 flex items-center gap-1 text-muted-foreground">

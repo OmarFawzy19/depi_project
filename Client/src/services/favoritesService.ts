@@ -1,29 +1,13 @@
-const KEY = "makany.favorites";
+import axiosClient from "@/lib/axiosClient";
 
-function read(): string[] {
-  try {
-    return JSON.parse(localStorage.getItem(KEY) ?? "[]");
-  } catch {
-    return [];
-  }
-}
-function write(ids: string[]) {
-  localStorage.setItem(KEY, JSON.stringify(ids));
-}
+export const getFavorites = () => {
+    return axiosClient.get("/favorites");
+};
 
-export const favoritesService = {
-  list(): string[] {
-    return read();
-  },
-  has(id: string): boolean {
-    return read().includes(id);
-  },
-  toggle(id: string): boolean {
-    const ids = read();
-    const i = ids.indexOf(id);
-    if (i >= 0) ids.splice(i, 1);
-    else ids.push(id);
-    write(ids);
-    return ids.includes(id);
-  },
+export const addFavorite = (id: string) => {
+    return axiosClient.post(`/favorites/${id}`);
+};
+
+export const removeFavorite = (id: string) => {
+    return axiosClient.delete(`/favorites/${id}`);
 };
