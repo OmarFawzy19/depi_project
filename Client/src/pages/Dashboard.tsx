@@ -1,16 +1,5 @@
 import { motion } from "framer-motion";
-<<<<<<< HEAD
-import {
-  Heart,
-  MessageSquare,
-  Search,
-  Plus,
-  Navigation,
-  Loader2,
-} from "lucide-react";
-=======
-import { Heart, Search, Plus, Navigation, Loader2 } from "lucide-react";
->>>>>>> f974239108dae9022c5bed39347b85ac7327f591
+import { Plus, Navigation, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -29,12 +18,12 @@ const recentSearches = [
 const Dashboard = () => {
   const { user } = useAuth();
   const { properties: allProperties } = useProperties();
-  const saved = allProperties.slice(0, 3);
   const { location, loading, request } = useGeolocation();
 
   return (
     <div className="min-h-screen bg-gradient-soft">
       <Navbar />
+
       <div className="container mx-auto px-4 py-10">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -45,9 +34,11 @@ const Dashboard = () => {
             <p className="text-sm font-semibold uppercase tracking-wider text-primary">
               Welcome back
             </p>
+
             <h1 className="font-heading text-3xl font-bold">
               Hi, {user?.name || "User"} 👋
             </h1>
+
             <p className="text-muted-foreground">
               Your nearby properties and activity at a glance.
             </p>
@@ -65,6 +56,7 @@ const Dashboard = () => {
               ) : (
                 <Navigation className="h-4 w-4" />
               )}
+
               {location ? "Recenter" : "Use my location"}
             </Button>
 
@@ -76,48 +68,11 @@ const Dashboard = () => {
           </div>
         </motion.div>
 
-        <div className="mb-8 grid gap-4 sm:grid-cols-2">
-          {[
-<<<<<<< HEAD
-            {
-              icon: Heart,
-              label: "Saved",
-              value: saved.length,
-              to: "/favorites",
-            },
-            {
-              icon: MessageSquare,
-              label: "Messages",
-              value: 4,
-              to: "/messages",
-            },
-            {
-              icon: Search,
-              label: "Searches",
-              value: recentSearches.length,
-              to: "/properties",
-            },
-=======
-            { icon: Heart, label: "Saved", value: saved.length, to: "/favorites" },
-            { icon: Search, label: "Searches", value: recentSearches.length, to: "/properties" },
->>>>>>> f974239108dae9022c5bed39347b85ac7327f591
-          ].map((s) => (
-            <Link
-              key={s.label}
-              to={s.to}
-              className="rounded-2xl bg-card p-5 shadow-card transition hover:shadow-card-hover"
-            >
-              <s.icon className="mb-3 h-6 w-6 text-primary" />
-              <p className="font-heading text-2xl font-bold">{s.value}</p>
-              <p className="text-sm text-muted-foreground">{s.label}</p>
-            </Link>
-          ))}
-        </div>
-
         <div className="mb-10">
           <h2 className="mb-4 font-heading text-xl font-semibold">
             Nearby properties
           </h2>
+
           <PropertyMap
             properties={allProperties}
             userLocation={location}
@@ -143,6 +98,7 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
       <Footer />
     </div>
   );
