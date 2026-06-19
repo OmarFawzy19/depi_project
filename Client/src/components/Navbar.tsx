@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";import { MapPin, Menu, X, User } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { MapPin, Menu, X, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/AuthContext";
@@ -17,11 +18,13 @@ export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-const { user, logout } = useAuth();
-const handleLogout = () => {
-  logout();
-  navigate("/");
-};
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -29,6 +32,7 @@ const handleLogout = () => {
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-primary shadow-glow">
             <MapPin className="h-5 w-5 text-primary-foreground" />
           </div>
+
           <span className="font-heading text-xl font-bold text-gradient">
             Makany
           </span>
@@ -48,42 +52,49 @@ const handleLogout = () => {
               {link.label}
             </Link>
           ))}
+
+          {user && (
+            <Link
+              to="/owner-dashboard"
+              className={`rounded-lg px-4 py-2 text-sm font-medium ${
+                location.pathname === "/owner-dashboard"
+                  ? "bg-accent text-accent-foreground"
+                  : "text-muted-foreground hover:bg-muted"
+              }`}
+            >
+              My List
+            </Link>
+          )}
         </div>
 
         {!hideAuth && (
-  <div className="hidden items-center gap-3 md:flex">
-    {!user ? (
-      <>
-        <Link to="/login">
-          <Button variant="outline" size="sm">
-            Log in
-          </Button>
-        </Link>
+          <div className="hidden items-center gap-3 md:flex">
+            {!user ? (
+              <>
+                <Link to="/login">
+                  <Button variant="outline" size="sm">
+                    Log in
+                  </Button>
+                </Link>
 
-        <Link to="/register">
-          <Button size="sm">
-            Sign up
-          </Button>
-        </Link>
-      </>
-    ) : (
-      <>
-        <div className="flex items-center gap-2 text-sm font-medium">
-          <User className="h-4 w-4" />
-          {user.name}
-        </div>
+                <Link to="/register">
+                  <Button size="sm">Sign up</Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <User className="h-4 w-4" />
+                  {user.name}
+                </div>
 
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={handleLogout}
-        >
-          Logout
-        </Button>
-      </>
-    )}
-  </div>
-)}
+                <Button variant="destructive" size="sm" onClick={handleLogout}>
+                  Logout
+                </Button>
+              </>
+            )}
+          </div>
+        )}
 
         <Button
           variant="ghost"

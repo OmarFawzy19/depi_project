@@ -37,7 +37,7 @@ export interface Property {
   images: string[];
   features: string[];
   status: string;
-  owner: { name: string; avatar: string; phone: string };
+  owner: { id: string; name: string; avatar: string; phone: string };
   isFeatured: boolean;
   createdAt: string;
   distance?: number;
@@ -61,6 +61,7 @@ function normalize(p: ApiProperty): Property {
     features: p.features ?? [],
     status: p.status,
     owner: {
+      id: p.owner?._id ?? "",
       name: p.owner?.name ?? "Unknown",
       avatar: "",
       phone: "",

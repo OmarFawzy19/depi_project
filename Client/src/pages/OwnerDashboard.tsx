@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { propertyService, type Property } from "@/services/propertyService";
+import { useAuth } from "@/hooks/AuthContext";
 
 const fallbackImage =
   "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop";
@@ -34,6 +35,8 @@ const getStatusClass = (status: string) => {
 };
 
 const OwnerDashboard = () => {
+  const { user } = useAuth();
+
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -110,10 +113,8 @@ const OwnerDashboard = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="font-heading text-3xl font-bold">Owner Dashboard</h1>
-            <p className="text-muted-foreground">
-              Manage your listings and inquiries
-            </p>
+            <h1 className="font-heading text-3xl font-bold">My Listings</h1>
+            <p className="text-muted-foreground">Manage your own properties</p>
           </div>
 
           <Link to="/add-property">
