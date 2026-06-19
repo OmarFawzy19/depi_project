@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+<<<<<<< HEAD
 import {
   Heart,
   MessageSquare,
@@ -7,6 +8,9 @@ import {
   Navigation,
   Loader2,
 } from "lucide-react";
+=======
+import { Heart, Search, Plus, Navigation, Loader2 } from "lucide-react";
+>>>>>>> f974239108dae9022c5bed39347b85ac7327f591
 import { Link } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -72,8 +76,9 @@ const Dashboard = () => {
           </div>
         </motion.div>
 
-        <div className="mb-8 grid gap-4 sm:grid-cols-3">
+        <div className="mb-8 grid gap-4 sm:grid-cols-2">
           {[
+<<<<<<< HEAD
             {
               icon: Heart,
               label: "Saved",
@@ -92,6 +97,10 @@ const Dashboard = () => {
               value: recentSearches.length,
               to: "/properties",
             },
+=======
+            { icon: Heart, label: "Saved", value: saved.length, to: "/favorites" },
+            { icon: Search, label: "Searches", value: recentSearches.length, to: "/properties" },
+>>>>>>> f974239108dae9022c5bed39347b85ac7327f591
           ].map((s) => (
             <Link
               key={s.label}

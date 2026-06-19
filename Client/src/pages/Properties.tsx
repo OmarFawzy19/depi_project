@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Search, SlidersHorizontal, Grid3X3, Map, Navigation, Loader2, X } from "lucide-react";
+import { Search, SlidersHorizontal, Grid3X3, Map as MapIcon, Navigation, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -166,7 +166,7 @@ const Properties = () => {
                 className="h-9 w-9 rounded-l-none"
                 onClick={() => setViewMode("map")}
               >
-                <Map className="h-4 w-4" />
+                <MapIcon className="h-4 w-4" />
               </Button>
             </div>
           </div>

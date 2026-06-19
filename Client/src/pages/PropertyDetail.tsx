@@ -8,7 +8,7 @@ import {
   Bath,
   Maximize,
   Phone,
-  MessageSquare,
+  Mail,
   Check,
   Loader2,
 } from "lucide-react";
@@ -242,7 +242,7 @@ const PropertyDetail = () => {
 
               <div className="flex flex-col gap-3">
                 <Button className="w-full gap-2">
-                  <MessageSquare className="h-4 w-4" /> Send Message
+                  <Mail className="h-4 w-4" /> Send Inquiry
                 </Button>
 
                 <Button variant="outline" className="w-full gap-2">
