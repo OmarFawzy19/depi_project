@@ -4,7 +4,6 @@ const axiosClient = axios.create({
   baseURL: "http://localhost:5000/api",
 });
 
-// 🔥 attach token automatically
 axiosClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
 

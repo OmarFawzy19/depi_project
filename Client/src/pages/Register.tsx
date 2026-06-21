@@ -2,7 +2,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { MapPin, Mail, Lock, User, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import axiosClient from "@/lib/axiosClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/AuthContext";
 import { getErrorMessage } from "@/lib/errorMessage";
@@ -10,36 +9,29 @@ import { getErrorMessage } from "@/lib/errorMessage";
 const Register = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { login } = useAuth();
+
+  const { register } = useAuth();
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      await axiosClient.post("/auth/register", {
-        name,
-        email,
-        password,
-        role: "user",
-      });
-
-      // Log the user in using the existing AuthContext
-      await login(email, password);
+      await register(name, email, password);
 
       toast({
         title: "Account created successfully!",
         description: "Welcome to Makany!",
       });
 
-      setTimeout(() => {
-        navigate("/home");
-      }, 1000);
-    } catch (err: any) {
+      navigate("/home", { replace: true });
+    } catch (err) {
       toast({
         title: "Registration failed",
         description: getErrorMessage(err, "Something went wrong."),
@@ -58,19 +50,30 @@ const Register = () => {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
               <MapPin className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="font-heading text-2xl font-bold">Makany</span>
+            <span className="font-heading text-2xl font-bold">
+              Makany
+            </span>
           </Link>
 
-          <h1 className="mt-4 font-heading text-2xl font-bold">Create an account</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Join Makany to find your perfect place</p>
+          <h1 className="mt-4 font-heading text-2xl font-bold">
+            Create an account
+          </h1>
+
+          <p className="mt-1 text-sm text-muted-foreground">
+            Join Makany to find your perfect place
+          </p>
         </div>
 
         <div className="rounded-2xl bg-card p-8 shadow-card">
-          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
-              <label className="mb-1 block text-sm font-medium">Full Name</label>
+              <label className="mb-1 block text-sm font-medium">
+                Full Name
+              </label>
+
               <div className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-3">
                 <User className="h-4 w-4 text-muted-foreground" />
+
                 <input
                   type="text"
                   placeholder="Enter your name"
@@ -83,9 +86,13 @@ const Register = () => {
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium">Email</label>
+              <label className="mb-1 block text-sm font-medium">
+                Email
+              </label>
+
               <div className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-3">
                 <Mail className="h-4 w-4 text-muted-foreground" />
+
                 <input
                   type="email"
                   placeholder="Enter your email"
@@ -98,9 +105,13 @@ const Register = () => {
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium">Password</label>
+              <label className="mb-1 block text-sm font-medium">
+                Password
+              </label>
+
               <div className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-3">
                 <Lock className="h-4 w-4 text-muted-foreground" />
+
                 <input
                   type="password"
                   placeholder="Enter your password"
@@ -112,19 +123,33 @@ const Register = () => {
               </div>
             </div>
 
-            <Button type="submit" className="mt-2 w-full gap-2" size="lg" disabled={loading}>
-              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              Create Account
+            <Button
+              type="submit"
+              className="mt-2 w-full gap-2"
+              size="lg"
+              disabled={loading}
+            >
+              {loading && (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              )}
+
+              {loading ? "Creating Account..." : "Create Account"}
             </Button>
           </form>
 
           <div className="mt-6 flex items-center gap-3">
             <div className="h-px flex-1 bg-border" />
-            <span className="text-xs text-muted-foreground">or continue with</span>
+            <span className="text-xs text-muted-foreground">
+              or continue with
+            </span>
             <div className="h-px flex-1 bg-border" />
           </div>
 
-          <Button variant="outline" className="mt-4 w-full gap-2" size="lg">
+          <Button
+            variant="outline"
+            className="mt-4 w-full gap-2"
+            size="lg"
+          >
             <svg className="h-4 w-4" viewBox="0 0 24 24">
               <path
                 fill="#4285F4"
@@ -143,13 +168,17 @@ const Register = () => {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
+
             Google
           </Button>
         </div>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link to="/login" className="font-semibold text-primary hover:underline">
+          <Link
+            to="/login"
+            className="font-semibold text-primary hover:underline"
+          >
             Sign in
           </Link>
         </p>
