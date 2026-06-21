@@ -1,12 +1,14 @@
-/**
- * Lightweight fetch wrapper. Swap baseURL for a real backend later.
- * Kept dependency-free (no axios) to avoid bloating the bundle.
- */
 const baseURL = import.meta.env.VITE_API_URL ?? "/api";
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const token = localStorage.getItem("token");
+
   const res = await fetch(`${baseURL}${path}`, {
-    headers: { "Content-Type": "application/json", ...(init.headers || {}) },
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(init.headers || {}),
+    },
     ...init,
   });
   if (!res.ok) throw new Error(`API ${res.status}: ${res.statusText}`);
