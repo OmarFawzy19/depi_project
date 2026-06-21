@@ -22,6 +22,7 @@ const uploadImage = async (req, res) => {
       imageUrl: result.secure_url,
     });
   } catch (error) {
+    console.error("Upload error:", error.message, error);
     res.status(500).json({
       success: false,
       message: "Image upload failed",

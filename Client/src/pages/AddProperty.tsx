@@ -4,7 +4,7 @@ import {
   type FormEvent,
   type ReactNode,
 } from "react";
-import axios from "axios";
+import axiosClient from "@/lib/axiosClient";
 import { Upload, MapPin, Loader2 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -83,21 +83,40 @@ const AddProperty = () => {
       return;
     }
 
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast({
+        title: "Not logged in",
+        description: "Please log in and try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setSubmitting(true);
 
+      // Upload images directly to Cloudinary (unsigned) — no backend CORS issues
       const uploadedImages: string[] = [];
-
       for (const image of images) {
-        const imageFormData = new FormData();
-        imageFormData.append("image", image);
+        try {
+          const imageFormData = new FormData();
+          imageFormData.append("file", image);
+          imageFormData.append("upload_preset", "makany_unsigned");
 
-        const uploadResponse = await axios.post(
-          "http://localhost:5000/api/upload",
-          imageFormData,
-        );
-
-        uploadedImages.push(uploadResponse.data.imageUrl);
+          const uploadResponse = await fetch(
+            "https://api.cloudinary.com/v1_1/dj1gq6vlo/image/upload",
+            { method: "POST", body: imageFormData }
+          );
+          const uploadData = await uploadResponse.json();
+          if (uploadData.secure_url) {
+            uploadedImages.push(uploadData.secure_url);
+          } else {
+            console.warn("Cloudinary upload returned no URL:", uploadData);
+          }
+        } catch (uploadErr) {
+          console.warn("Image upload failed for one file, skipping:", uploadErr);
+        }
       }
 
       await propertyService.create({
@@ -112,23 +131,46 @@ const AddProperty = () => {
         location: formData.location,
         lat: point.lat,
         lng: point.lng,
-        images:
-          uploadedImages.length > 0 ? uploadedImages : ["/placeholder.svg"],
+        images: uploadedImages.length > 0 ? uploadedImages : ["/placeholder.svg"],
         features: [],
       });
 
       toast({
-        title: "Listing submitted",
+        title: "Listing submitted ✅",
         description: "Your property is now under review.",
       });
 
       navigate("/properties");
-    } catch {
-      toast({
-        title: "Failed to submit property",
-        description: "Please make sure you are logged in and try again.",
-        variant: "destructive",
-      });
+    } catch (err: unknown) {
+      const status =
+        err &&
+        typeof err === "object" &&
+        "response" in err &&
+        err.response &&
+        typeof err.response === "object" &&
+        "status" in err.response
+          ? (err.response as { status: number }).status
+          : null;
+
+      if (status === 401) {
+        toast({
+          title: "Session expired",
+          description: "Please log out and log back in, then try again.",
+          variant: "destructive",
+        });
+      } else if (status === 403) {
+        toast({
+          title: "Not authorised",
+          description: "You don't have permission to add properties.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Failed to submit property",
+          description: "Something went wrong. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setSubmitting(false);
     }
