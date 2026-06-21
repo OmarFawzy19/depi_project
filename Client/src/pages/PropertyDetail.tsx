@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Heart,
@@ -19,6 +19,8 @@ import { Footer } from "@/components/Footer";
 import { propertyService, type Property } from "@/services/propertyService";
 import { PropertyCard } from "@/components/PropertyCard";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import EnquiryForm from "@/components/EnquiryForm";
+import { useAuth } from "@/hooks/AuthContext";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { PropertyMap } from "@/components/PropertyMap";
@@ -29,10 +31,12 @@ const fallbackImage =
 
 const PropertyDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [property, setProperty] = useState<Property | null>(null);
   const [similar, setSimilar] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const { location: userLocation, request: requestLocation } = useGeolocation();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (!id) return;
@@ -241,9 +245,16 @@ const PropertyDetail = () => {
               </div>
 
               <div className="flex flex-col gap-3">
-                <Button className="w-full gap-2">
-                  <Mail className="h-4 w-4" /> Send Inquiry
-                </Button>
+                {user ? (
+                  <EnquiryForm propertyId={property.id} />
+                ) : (
+                  <Button
+                    className="w-full"
+                    onClick={() => navigate("/login")}
+                  >
+                    <Mail className="h-4 w-4" /> Login to send inquiry
+                  </Button>
+                )}
 
                 <Button variant="outline" className="w-full gap-2">
                   <Phone className="h-4 w-4" /> Call Owner
