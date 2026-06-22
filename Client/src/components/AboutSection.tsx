@@ -1,12 +1,4 @@
 import { motion } from "framer-motion";
-import { Building2, MapPin, Star, Users } from "lucide-react";
-
-const stats = [
-  { icon: Building2, value: "2,400+", label: "Active Listings" },
-  { icon: Users, value: "18,000+", label: "Happy Renters" },
-  { icon: MapPin, value: "30+", label: "Cities Covered" },
-  { icon: Star, value: "4.9", label: "Average Rating" },
-];
 
 const values = [
   {
@@ -84,26 +76,6 @@ export function AboutSection() {
             <p className="mt-3 text-center text-sm text-muted-foreground">— The Makany Team</p>
           </div>
         </motion.div>
-
-        {/* Stats strip */}
-        <div className="mb-16 grid grid-cols-2 gap-4 md:grid-cols-4">
-          {stats.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="flex flex-col items-center gap-3 rounded-2xl border border-border/70 bg-card p-6 shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover"
-            >
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent">
-                <stat.icon className="h-5 w-5 text-accent-foreground" />
-              </div>
-              <p className="font-heading text-3xl font-extrabold text-foreground">{stat.value}</p>
-              <p className="text-sm text-muted-foreground">{stat.label}</p>
-            </motion.div>
-          ))}
-        </div>
 
         {/* Mission + Values side-by-side */}
         <div className="grid gap-8 lg:grid-cols-2 lg:items-center">

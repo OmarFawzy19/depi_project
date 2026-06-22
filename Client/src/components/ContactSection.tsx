@@ -154,7 +154,7 @@ export function ContactSection() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.65, ease: "easeOut" }}
-            className="bg-gradient-primary p-8 sm:p-10 lg:col-span-2 flex flex-col justify-between"
+            className="relative overflow-hidden bg-gradient-primary p-8 sm:p-10 lg:col-span-2 flex flex-col justify-between"
           >
             <div>
               <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15">
