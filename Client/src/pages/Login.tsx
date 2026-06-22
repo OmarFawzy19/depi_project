@@ -28,35 +28,45 @@ const Login = () => {
     }
   }, [location.state, toast]);
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
+const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      await login(email, password);
+  try {
+    // Login and get the logged-in user
+    const user = await login(email, password);
 
-      toast({
-        title: "Login successful",
-        description: "Welcome back!",
-      });
+    toast({
+      title: "Login successful",
+      description: `Welcome back, ${user.name}!`,
+    });
 
-      const state = location.state as {
-        from?: { pathname?: string };
-      } | null;
-
-      navigate(state?.from?.pathname ?? "/home", {
+    // Redirect based on role
+    if (user.role === "admin") {
+      navigate("/Admin", {
         replace: true,
       });
-    } catch (err) {
-      toast({
-        title: "Login failed",
-        description: getErrorMessage(err, "Unable to sign in."),
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+      return;
     }
-  };
+
+    // Normal user
+    const state = location.state as {
+      from?: { pathname?: string };
+    } | null;
+
+    navigate(state?.from?.pathname ?? "/home", {
+      replace: true,
+    });
+  } catch (err) {
+    toast({
+      title: "Login failed",
+      description: getErrorMessage(err, "Unable to sign in."),
+      variant: "destructive",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
