@@ -14,13 +14,19 @@ const adminRoutes = require("./routes/adminRoute");
 const favoriteRoutes = require("./routes/favoriteRoutes");
 const enquiryRoutes = require("./routes/enquiryRoutes");
 const uploadRoute = require("./routes/uploadRoute");
+const userRoutes = require("./routes/userRoute");
 
 const auth = require("./middleware/auth");
 
 const app = express();
 
 app.use(cors({
-  origin: ["http://localhost:8080", "http://localhost:5173", "http://localhost:3000"],
+  origin: [
+    "http://localhost:8080",
+    "http://localhost:8081",
+    "http://localhost:5173",
+    "http://localhost:3000",
+  ],
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
@@ -38,6 +44,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/favorites", favoriteRoutes);
 app.use("/api/enquiries", enquiryRoutes);
 app.use("/api/upload", uploadRoute);
+app.use("/api/user", userRoutes);
 
 // =======================
 // TEST ROUTE (protected)
