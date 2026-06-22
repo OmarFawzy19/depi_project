@@ -11,6 +11,8 @@ import {
   Mail,
   Check,
   Loader2,
+  Edit,
+  Home,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +39,8 @@ const PropertyDetail = () => {
   const [loading, setLoading] = useState(true);
   const { location: userLocation, request: requestLocation } = useGeolocation();
   const { user } = useAuth();
+  const userId = user ? ((user as any)._id ?? user.id) : null;
+  const isOwner = !!(userId && property && userId.toString() === property.owner.id.toString());
 
   useEffect(() => {
     if (!id) return;
@@ -228,7 +232,7 @@ const PropertyDetail = () => {
           <div>
             <div className="sticky top-20 rounded-2xl bg-card p-6 shadow-card">
               <h3 className="mb-4 font-heading text-lg font-semibold">
-                Contact Owner
+                {isOwner ? "Manage Listing" : "Contact Owner"}
               </h3>
 
               <div className="mb-4 flex items-center gap-3">
@@ -239,26 +243,46 @@ const PropertyDetail = () => {
                 <div>
                   <p className="font-semibold">{property.owner.name}</p>
                   <p className="text-sm text-muted-foreground">
-                    Property Owner
+                    {isOwner ? "You own this listing" : "Property Owner"}
                   </p>
                 </div>
               </div>
 
               <div className="flex flex-col gap-3">
-                {user ? (
-                  <EnquiryForm propertyId={property.id} />
+                {isOwner ? (
+                  <div className="flex flex-col gap-3 rounded-xl border border-border bg-accent/40 p-4 text-center">
+                    <p className="text-xs text-muted-foreground font-medium">
+                      This is your property listing. You cannot contact yourself.
+                    </p>
+                    <Link to={`/edit-property/${property.id}`} className="w-full">
+                      <Button className="w-full gap-2">
+                        <Edit className="h-4 w-4" /> Edit Listing
+                      </Button>
+                    </Link>
+                    <Link to="/owner-dashboard" className="w-full">
+                      <Button variant="outline" className="w-full gap-2">
+                        <Home className="h-4 w-4" /> Go to Dashboard
+                      </Button>
+                    </Link>
+                  </div>
                 ) : (
-                  <Button
-                    className="w-full"
-                    onClick={() => navigate("/login")}
-                  >
-                    <Mail className="h-4 w-4" /> Login to send inquiry
-                  </Button>
-                )}
+                  <>
+                    {user ? (
+                      <EnquiryForm propertyId={property.id} />
+                    ) : (
+                      <Button
+                        className="w-full"
+                        onClick={() => navigate("/login")}
+                      >
+                        <Mail className="h-4 w-4" /> Login to send inquiry
+                      </Button>
+                    )}
 
-                <Button variant="outline" className="w-full gap-2">
-                  <Phone className="h-4 w-4" /> Call Owner
-                </Button>
+                    <Button variant="outline" className="w-full gap-2">
+                      <Phone className="h-4 w-4" /> Call Owner
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </div>
