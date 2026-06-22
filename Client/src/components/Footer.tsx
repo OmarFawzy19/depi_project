@@ -41,7 +41,18 @@ export function Footer() {
               >
                 About Us
               </a>
-              <span className="text-sm text-muted-foreground">Contact</span>
+              <a
+                href="/#contact"
+                onClick={(e) => {
+                  if (window.location.pathname === "/") {
+                    e.preventDefault();
+                    document.getElementById("contact")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }
+                }}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Contact
+              </a>
               <span className="text-sm text-muted-foreground">Careers</span>
             </div>
           </div>

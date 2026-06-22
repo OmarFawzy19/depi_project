@@ -15,6 +15,7 @@ const favoriteRoutes = require("./routes/favoriteRoutes");
 const enquiryRoutes = require("./routes/enquiryRoutes");
 const uploadRoute = require("./routes/uploadRoute");
 const userRoutes = require("./routes/userRoute");
+const contactRoutes = require("./routes/contactRoute");
 
 const auth = require("./middleware/auth");
 
@@ -45,6 +46,7 @@ app.use("/api/favorites", favoriteRoutes);
 app.use("/api/enquiries", enquiryRoutes);
 app.use("/api/upload", uploadRoute);
 app.use("/api/user", userRoutes);
+app.use("/api/contact", contactRoutes);
 
 // =======================
 // TEST ROUTE (protected)
