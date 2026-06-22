@@ -20,6 +20,9 @@ const contactRoutes = require("./routes/contactRoute");
 const auth = require("./middleware/auth");
 
 const app = express();
+const passport = require("passport");
+const session = require("express-session");
+require("./config/passport");
 
 app.use(cors({
   origin: [
@@ -33,6 +36,16 @@ app.use(cors({
   credentials: true,
 }));
 app.use(express.json());
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(logger);
 app.use(rateLimiter);
 

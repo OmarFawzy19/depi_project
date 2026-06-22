@@ -3,6 +3,7 @@ import {
   type ReactNode,
   useContext,
   useState,
+  useEffect,
 } from "react";
 
 import { authService } from "@/services/authService";
@@ -10,14 +11,18 @@ import type { User } from "@/types/User";
 
 interface AuthContextValue {
   user: User | null;
+
   login: (email: string, password: string) => Promise<User>;
+
   register: (
     name: string,
     email: string,
     phone: string,
     password: string
   ) => Promise<User>;
+
   logout: () => void;
+
   updateUser: (updates: Partial<User>) => void;
 }
 
@@ -30,12 +35,28 @@ export const AuthProvider = ({
 }) => {
   const [user, setUser] = useState<User | null>(authService.current());
 
+  useEffect(() => {
+    const syncUser = () => {
+      setUser(authService.current());
+    };
+
+    window.addEventListener("storage", syncUser);
+    window.addEventListener("google-login", syncUser);
+
+    return () => {
+      window.removeEventListener("storage", syncUser);
+      window.removeEventListener("google-login", syncUser);
+    };
+  }, []);
+
   const login = async (
     email: string,
     password: string
   ): Promise<User> => {
     const loggedInUser = await authService.login(email, password);
+
     setUser(loggedInUser);
+
     return loggedInUser;
   };
 
@@ -53,6 +74,7 @@ export const AuthProvider = ({
     );
 
     setUser(newUser);
+
     return newUser;
   };
 

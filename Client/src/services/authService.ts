@@ -73,6 +73,16 @@ export const authService = {
       password,
     });
   },
+async googleLogin(token: string): Promise<User> {
+  const res = await axiosClient.post("/auth/google-login", {
+    token,
+  });
+
+  localStorage.setItem("token", token);
+  localStorage.setItem("user", JSON.stringify(res.data.user));
+
+  return res.data.user;
+},
 
   logout(): void {
     localStorage.removeItem(TOKEN_KEY);
