@@ -36,7 +36,13 @@ exports.register = async (req, res) => {
 
     res.status(201).json({
       token,
-      user,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phone: user.phone ?? "",
+      },
     });
   } catch (err) {
     res.status(500).json({
@@ -89,7 +95,13 @@ exports.login = async (req, res) => {
     // ✅ Return token and user
     res.json({
       token,
-      user,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phone: user.phone ?? "",
+      },
     });
   } catch (err) {
     res.status(500).json({

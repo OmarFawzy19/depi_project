@@ -29,8 +29,30 @@ export function Footer() {
           <div>
             <h4 className="mb-3 font-heading text-sm font-semibold">Company</h4>
             <div className="flex flex-col gap-2">
-              <span className="text-sm text-muted-foreground">About Us</span>
-              <span className="text-sm text-muted-foreground">Contact</span>
+              <a
+                href="/#about"
+                onClick={(e) => {
+                  if (window.location.pathname === "/") {
+                    e.preventDefault();
+                    document.getElementById("about")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }
+                }}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                About Us
+              </a>
+              <a
+                href="/#contact"
+                onClick={(e) => {
+                  if (window.location.pathname === "/") {
+                    e.preventDefault();
+                    document.getElementById("contact")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }
+                }}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Contact
+              </a>
               <span className="text-sm text-muted-foreground">Careers</span>
             </div>
           </div>

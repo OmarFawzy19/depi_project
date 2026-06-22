@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { MapPin, Menu, X } from "lucide-react";
+import { MapPin, Menu, Moon, Sun, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/AuthContext";
+import { useTheme } from "@/hooks/ThemeContext";
 import { UserDropdown } from "@/components/UserDropdown";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +28,7 @@ export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   const links = user
     ? [...navLinks, { label: "My Properties", path: "/my-properties" }]
@@ -69,43 +71,60 @@ export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
           })}
         </div>
 
-        {!hideAuth && (
-          <div className="hidden items-center gap-3 md:flex">
-            {!user ? (
-              <>
-                <Button
-                  asChild
-                  variant="outline"
-                  size="sm"
-                  className="rounded-xl"
-                >
-                  <Link to="/login">Log in</Link>
-                </Button>
+        <div className="flex items-center gap-2">
+          {!hideAuth && (
+            <div className="hidden items-center gap-3 md:flex">
+              {!user ? (
+                <>
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="rounded-xl"
+                  >
+                    <Link to="/login">Log in</Link>
+                  </Button>
 
-                <Button asChild size="sm" className="rounded-xl">
-                  <Link to="/register">Sign up</Link>
-                </Button>
-              </>
-            ) : (
-              <UserDropdown />
-            )}
-          </div>
-        )}
-
-        <Button
-          variant="ghost"
-          size="icon"
-          className="rounded-xl md:hidden"
-          onClick={() => setMobileOpen((open) => !open)}
-          aria-label="Toggle navigation"
-          aria-expanded={mobileOpen}
-        >
-          {mobileOpen ? (
-            <X className="h-5 w-5" />
-          ) : (
-            <Menu className="h-5 w-5" />
+                  <Button asChild size="sm" className="rounded-xl">
+                    <Link to="/register">Sign up</Link>
+                  </Button>
+                </>
+              ) : (
+                <UserDropdown />
+              )}
+            </div>
           )}
-        </Button>
+
+          {/* Theme toggle — always visible */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            className="hidden rounded-xl md:flex"
+            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {theme === "dark" ? (
+              <Sun className="h-5 w-5 text-yellow-400" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-xl md:hidden"
+            onClick={() => setMobileOpen((open) => !open)}
+            aria-label="Toggle navigation"
+            aria-expanded={mobileOpen}
+          >
+            {mobileOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
+          </Button>
+        </div>
       </div>
 
       <AnimatePresence>
@@ -142,6 +161,17 @@ export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
 
               {!hideAuth && (
                 <div className="mt-4 border-t border-border pt-4">
+                  {/* Mobile theme toggle */}
+                  <button
+                    onClick={toggleTheme}
+                    className="mb-3 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                  >
+                    {theme === "dark" ? (
+                      <><Sun className="h-4 w-4 text-yellow-400" /> Light Mode</>
+                    ) : (
+                      <><Moon className="h-4 w-4" /> Dark Mode</>
+                    )}
+                  </button>
                   {!user ? (
                     <div className="grid gap-2">
                       <Button asChild variant="outline" className="rounded-xl">

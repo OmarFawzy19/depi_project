@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Heart, Loader2, MapPin, Navigation, Search, ShieldCheck } from "lucide-react";
+import { useCallback } from "react";
+import { ArrowRight, ChevronDown, Heart, Loader2, MapPin, MessageCircle, Navigation, Search, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
@@ -7,6 +8,8 @@ import { Footer } from "@/components/Footer";
 import { PropertyCard } from "@/components/PropertyCard";
 import { useProperties } from "@/hooks/useProperties";
 import { PropertyMap } from "@/components/PropertyMap";
+import { ContactSection } from "@/components/ContactSection";
+import { AboutSection } from "@/components/AboutSection";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import heroBg from "@/assets/hero-bg.jpg";
 
@@ -28,10 +31,15 @@ const steps = [
   },
 ];
 
+
 const HomeLanding = () => {
   const { properties: allProperties } = useProperties();
   const featured = allProperties.slice(0, 6);
   const { location, loading, request } = useGeolocation();
+
+  const scrollToAbout = useCallback(() => {
+    document.getElementById("about")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -63,7 +71,7 @@ const HomeLanding = () => {
               property owners and explore verified listings.
             </p>
 
-            <div className="mt-9 flex justify-center lg:justify-start">
+            <div className="mt-9 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
               <Button
                 asChild
                 size="lg"
@@ -74,7 +82,38 @@ const HomeLanding = () => {
                   <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
                 </Link>
               </Button>
+
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={scrollToAbout}
+                className="group h-auto rounded-xl border-white/30 bg-white/10 px-7 py-4 text-base font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:border-white/50 hover:bg-white/20 hover:-translate-y-0.5"
+              >
+                Our Story
+                <ChevronDown className="h-5 w-5 transition-transform duration-300 group-hover:translate-y-0.5" />
+              </Button>
             </div>
+
+            {/* Contact Us CTA */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.6 }}
+              className="mt-6 flex items-center justify-center lg:justify-start"
+            >
+              <button
+                type="button"
+                onClick={() =>
+                  document
+                    .getElementById("contact")
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" })
+                }
+                className="group flex items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:border-white/50 hover:bg-white/20 hover:-translate-y-0.5"
+              >
+                <MessageCircle className="h-4 w-4 shrink-0 transition-transform duration-300 group-hover:scale-110" />
+                Contact Us
+              </button>
+            </motion.div>
           </motion.div>
         </div>
       </section>
@@ -151,6 +190,10 @@ const HomeLanding = () => {
           </div>
         </div>
       </section>
+
+      <AboutSection />
+
+      <ContactSection />
 
       <section className="pb-20 pt-4">
         <div className="container mx-auto px-4">
