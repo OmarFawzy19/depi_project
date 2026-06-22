@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 // 🔐 REGISTER
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, phone, role } = req.body;
 
     const existing = await User.findOne({ email });
 
@@ -19,6 +19,7 @@ exports.register = async (req, res) => {
       name,
       email,
       password,
+      phone,
       role,
     });
 
@@ -53,14 +54,15 @@ exports.login = async (req, res) => {
 
     if (!user) {
       return res.status(404).json({
-        error: "No account found with this email."
+        error: "No account found with this email.",
       });
     }
 
-    // Block deactivated accounts
+    // 🚫 Block deactivated accounts
     if (user.status === "deactivated") {
       return res.status(403).json({
-        error: "This account has been deactivated. Please contact support to reactivate."
+        error:
+          "This account has been deactivated. Please contact support to reactivate.",
       });
     }
 
@@ -68,7 +70,7 @@ exports.login = async (req, res) => {
 
     if (!isMatch) {
       return res.status(401).json({
-        error: "Incorrect password."
+        error: "Incorrect password.",
       });
     }
 
@@ -89,15 +91,12 @@ exports.login = async (req, res) => {
       token,
       user,
     });
-
   } catch (err) {
     res.status(500).json({
       error: err.message,
     });
   }
 };
-
-
 
 // 🔐 REQUEST OTP
 const transporter = require("../utils/mailer");
@@ -116,20 +115,19 @@ exports.requestOtp = async (req, res) => {
       expiresAt: new Date(Date.now() + 10 * 60 * 1000),
     });
 
-    // ✅ SEND EMAIL
     await transporter.sendMail({
       from: `Makany <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Your OTP Code",
-     html: `
-  <div style="font-family: Arial; padding: 20px;">
-    <h2 style="color:#2563eb;">Makany</h2>
-    <p>Hello 👋</p>
-    <p>Your verification code is:</p>
-    <h1 style="letter-spacing:5px;">${otp}</h1>
-    <p>This code expires in 10 minutes.</p>
-  </div>
-`,
+      html: `
+        <div style="font-family: Arial; padding: 20px;">
+          <h2 style="color:#2563eb;">Makany</h2>
+          <p>Hello 👋</p>
+          <p>Your verification code is:</p>
+          <h1 style="letter-spacing:5px;">${otp}</h1>
+          <p>This code expires in 10 minutes.</p>
+        </div>
+      `,
     });
 
     res.json({ message: "OTP sent to email 📩" });
@@ -144,32 +142,49 @@ exports.verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
 
-    // 🔥 MASTER OTP BYPASS: If otp is "123456", bypass database checks completely
+    // 🔥 MASTER OTP BYPASS
     if (otp && otp.trim() === "123456") {
-      return res.json({ message: "OTP verified ✅ (Bypassed via Master OTP)" });
+      return res.json({
+        message: "OTP verified ✅ (Bypassed via Master OTP)",
+      });
     }
 
-    const record = await OtpToken.findOne({ email }).sort({ createdAt: -1 });
+    const record = await OtpToken.findOne({ email }).sort({
+      createdAt: -1,
+    });
 
     if (!record) {
-      return res.status(400).json({ error: "OTP not found. Use Master OTP '123456' to bypass." });
+      return res.status(400).json({
+        error:
+          "OTP not found. Use Master OTP '123456' to bypass.",
+      });
     }
 
     if (record.otp !== otp.trim()) {
-      return res.status(400).json({ error: "Invalid OTP" });
+      return res.status(400).json({
+        error: "Invalid OTP",
+      });
     }
 
     if (record.expiresAt < new Date()) {
-      return res.status(400).json({ error: "OTP expired" });
+      return res.status(400).json({
+        error: "OTP expired",
+      });
     }
 
     await OtpToken.deleteMany({ email });
 
-    res.json({ message: "OTP verified ✅" });
+    res.json({
+      message: "OTP verified ✅",
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      error: err.message,
+    });
   }
 };
+
+// 🔐 RESET PASSWORD
 exports.resetPassword = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -177,14 +192,20 @@ exports.resetPassword = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(400).json({ error: "User not found" });
+      return res.status(400).json({
+        error: "User not found",
+      });
     }
 
     user.password = password;
     await user.save();
 
-    res.json({ message: "Password updated ✅" });
+    res.json({
+      message: "Password updated ✅",
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      error: err.message,
+    });
   }
 };

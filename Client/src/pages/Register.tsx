@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { MapPin, Mail, Lock, User, Loader2 } from "lucide-react";
+import { MapPin, Mail, Lock, User, Phone, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +14,7 @@ const Register = () => {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
@@ -23,7 +24,7 @@ const Register = () => {
     setLoading(true);
 
     try {
-      await register(name, email, password);
+      await register(name, email, phone, password);
 
       toast({
         title: "Account created successfully!",
@@ -84,7 +85,24 @@ const Register = () => {
                 />
               </div>
             </div>
+<div>
+  <label className="mb-1 block text-sm font-medium">
+    Phone Number
+  </label>
 
+  <div className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-3">
+    <Phone className="h-4 w-4 text-muted-foreground" />
+
+    <input
+      type="tel"
+      placeholder="Enter your phone number"
+      value={phone}
+      onChange={(e) => setPhone(e.target.value)}
+      className="w-full bg-transparent text-sm focus:outline-none"
+      required
+    />
+  </div>
+</div>
             <div>
               <label className="mb-1 block text-sm font-medium">
                 Email

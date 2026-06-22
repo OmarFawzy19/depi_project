@@ -14,6 +14,7 @@ interface AuthContextValue {
   register: (
     name: string,
     email: string,
+    phone: string,
     password: string
   ) => Promise<User>;
   logout: () => void;
@@ -41,11 +42,13 @@ export const AuthProvider = ({
   const register = async (
     name: string,
     email: string,
+    phone: string,
     password: string
   ): Promise<User> => {
     const newUser = await authService.register(
       name,
       email,
+      phone,
       password
     );
 
@@ -61,8 +64,14 @@ export const AuthProvider = ({
   const updateUser = (updates: Partial<User>): void => {
     setUser((prev) => {
       if (!prev) return prev;
-      const updated = { ...prev, ...updates };
+
+      const updated = {
+        ...prev,
+        ...updates,
+      };
+
       localStorage.setItem("user", JSON.stringify(updated));
+
       return updated;
     });
   };
