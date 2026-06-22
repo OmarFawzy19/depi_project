@@ -51,6 +51,12 @@ export const authService = {
     });
   },
 
+  async requestOtp(email: string): Promise<void> {
+  await axiosClient.post("/auth/request-otp", {
+    email,
+  });
+},
+
   async verifyOtp(email: string, otp: string): Promise<void> {
     await axiosClient.post("/auth/verify-otp", {
       email,

@@ -5,18 +5,15 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/AuthContext";
 import { getErrorMessage } from "@/lib/errorMessage";
+import { authService } from "@/services/authService";
 
 const Register = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  const { register } = useAuth();
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -24,15 +21,26 @@ const Register = () => {
     setLoading(true);
 
     try {
-      await register(name, email, phone, password);
+  await authService.requestOtp(email);
 
-      toast({
-        title: "Account created successfully!",
-        description: "Welcome to Makany!",
-      });
+  localStorage.setItem(
+    "tempUser",
+    JSON.stringify({
+      name,
+      email,
+      phone,
+      password,
+      role: "user",
+    })
+  );
 
-      navigate("/home", { replace: true });
-    } catch (err) {
+  toast({
+    title: "OTP Sent",
+    description: "Please check your email.",
+  });
+
+  navigate("/verify-otp");
+} catch (err) {
       toast({
         title: "Registration failed",
         description: getErrorMessage(err, "Something went wrong."),
