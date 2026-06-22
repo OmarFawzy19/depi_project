@@ -140,7 +140,7 @@ const AddProperty = () => {
         description: "Your property is now under review.",
       });
 
-      navigate("/properties");
+      navigate("/my-properties");
     } catch (err: unknown) {
       const status =
         err &&

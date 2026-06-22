@@ -21,7 +21,9 @@ export function Footer() {
             <h4 className="mb-3 font-heading text-sm font-semibold">Explore</h4>
             <div className="flex flex-col gap-2">
               <Link to="/properties" className="text-sm text-muted-foreground hover:text-foreground">Properties</Link>
+              <Link to="/map" className="text-sm text-muted-foreground hover:text-foreground">Map</Link>
               <Link to="/favorites" className="text-sm text-muted-foreground hover:text-foreground">Favorites</Link>
+              <Link to="/my-properties" className="text-sm text-muted-foreground hover:text-foreground">My Properties</Link>
             </div>
           </div>
           <div>

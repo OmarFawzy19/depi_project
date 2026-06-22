@@ -17,6 +17,7 @@ interface AuthContextValue {
     password: string
   ) => Promise<User>;
   logout: () => void;
+  updateUser: (updates: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -57,6 +58,15 @@ export const AuthProvider = ({
     setUser(null);
   };
 
+  const updateUser = (updates: Partial<User>): void => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const updated = { ...prev, ...updates };
+      localStorage.setItem("user", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -64,6 +74,7 @@ export const AuthProvider = ({
         login,
         register,
         logout,
+        updateUser,
       }}
     >
       {children}

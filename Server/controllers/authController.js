@@ -57,6 +57,13 @@ exports.login = async (req, res) => {
       });
     }
 
+    // Block deactivated accounts
+    if (user.status === "deactivated") {
+      return res.status(403).json({
+        error: "This account has been deactivated. Please contact support to reactivate."
+      });
+    }
+
     const isMatch = await user.comparePassword(password);
 
     if (!isMatch) {

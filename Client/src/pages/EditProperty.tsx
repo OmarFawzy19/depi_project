@@ -30,13 +30,13 @@ const EditProperty = () => {
 
     propertyService.getById(id).then((property) => {
       if (!property) {
-        navigate("/owner-dashboard");
+        navigate("/my-properties");
         return;
       }
 
       if (property.status !== "paused") {
         alert("You must pause this property before editing it.");
-        navigate("/owner-dashboard");
+        navigate("/my-properties");
         return;
       }
 
@@ -112,7 +112,7 @@ const EditProperty = () => {
 
       alert("Property updated successfully and sent for admin approval.");
 
-      navigate("/owner-dashboard");
+      navigate("/my-properties");
     } catch {
       alert("Failed to update property");
     } finally {

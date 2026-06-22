@@ -1,16 +1,16 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { MapPin, Menu, User, X } from "lucide-react";
+import { MapPin, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/AuthContext";
+import { UserDropdown } from "@/components/UserDropdown";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
   { label: "Home", path: "/" },
   { label: "Properties", path: "/properties" },
   { label: "Map", path: "/map" },
-  { label: "Dashboard", path: "/dashboard" },
   { label: "Favorites", path: "/favorites" },
 ];
 
@@ -18,23 +18,18 @@ const isActivePath = (pathname: string, path: string) => {
   if (path === "/") return pathname === "/" || pathname === "/home";
   if (path === "/properties")
     return pathname === "/properties" || pathname.startsWith("/property/");
+  if (path === "/my-properties")
+    return pathname === "/my-properties" || pathname.startsWith("/edit-property/");
   return pathname === path;
 };
 
 export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
   const { user, logout } = useAuth();
 
-  const handleLogout = () => {
-    logout();
-    setMobileOpen(false);
-    navigate("/");
-  };
-
   const links = user
-    ? [...navLinks, { label: "My List", path: "/owner-dashboard" }]
+    ? [...navLinks, { label: "My Properties", path: "/my-properties" }]
     : navLinks;
 
   return (
@@ -92,21 +87,7 @@ export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
                 </Button>
               </>
             ) : (
-              <>
-                <div className="flex items-center gap-2 rounded-full bg-muted px-3 py-2 text-sm font-semibold">
-                  <User className="h-4 w-4" />
-                  {user.name}
-                </div>
-
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  className="rounded-xl"
-                  onClick={handleLogout}
-                >
-                  Logout
-                </Button>
-              </>
+              <UserDropdown />
             )}
           </div>
         )}
@@ -179,16 +160,22 @@ export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
                       </Button>
                     </div>
                   ) : (
-                    <div className="grid gap-3">
-                      <div className="flex items-center gap-2 rounded-xl bg-muted px-4 py-3 text-sm font-semibold">
-                        <User className="h-4 w-4" />
-                        {user.name}
-                      </div>
+                    <div className="grid gap-2">
+                      <Link
+                        to="/account-settings"
+                        onClick={() => setMobileOpen(false)}
+                        className="rounded-xl px-4 py-3 text-sm font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      >
+                        Account Settings
+                      </Link>
 
                       <Button
                         variant="destructive"
                         className="rounded-xl"
-                        onClick={handleLogout}
+                        onClick={() => {
+                          logout();
+                          setMobileOpen(false);
+                        }}
                       >
                         Logout
                       </Button>
