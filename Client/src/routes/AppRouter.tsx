@@ -17,7 +17,7 @@ import MyProperties from "@/pages/MyProperties";
 import EditProperty from "@/pages/EditProperty";
 import AddProperty from "@/pages/AddProperty";
 import AccountSettings from "@/pages/AccountSettings";
-
+import GoogleSuccess from "@/pages/GoogleSuccess";
 export const AppRouter = () => {
   return (
     <BrowserRouter>
@@ -43,7 +43,10 @@ export const AppRouter = () => {
             </RoleRoute>
           }
         />
-
+<Route
+  path="/google-success"
+  element={<GoogleSuccess />}
+/>
         <Route
           path="/add-property"
           element={
