@@ -6,41 +6,34 @@ const GoogleSuccess = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = searchParams.get("token");
-    const userData = searchParams.get("user");
+  const token = searchParams.get("token");
+  const userData = searchParams.get("user");
 
-    if (!token || !userData) {
-      navigate("/login", { replace: true });
-      return;
-    }
+  if (!token || !userData) {
+    navigate("/login", { replace: true });
+    return;
+  }
 
-    try {
-      const user = JSON.parse(decodeURIComponent(userData));
+  try {
+    const user = JSON.parse(decodeURIComponent(userData));
 
-localStorage.setItem("token", token);
-localStorage.setItem("user", JSON.stringify(user));
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
 
-window.dispatchEvent(new Event("google-login"));
+    window.dispatchEvent(new Event("google-login"));
 
-navigate("/home", { replace: true });
+    navigate(user.role === "admin" ? "/admin" : "/home", {
+      replace: true,
+    });
+  } catch (err) {
+    console.error(err);
 
-      // Give React time to update state
-      setTimeout(() => {
-        if (user.role === "admin") {
-          navigate("/admin", { replace: true });
-        } else {
-          navigate("/home", { replace: true });
-        }
-      }, 50);
-    } catch (err) {
-      console.error(err);
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
 
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-
-      navigate("/login", { replace: true });
-    }
-  }, [searchParams, navigate]);
+    navigate("/login", { replace: true });
+  }
+}, [searchParams, navigate]);
 
   return (
     <div className="flex min-h-screen items-center justify-center">

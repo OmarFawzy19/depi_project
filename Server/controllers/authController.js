@@ -219,3 +219,43 @@ exports.resetPassword = async (req, res) => {
     });
   }
 };
+exports.googleSuccess = async (req, res) => {
+  try {
+    const token = jwt.sign(
+      {
+        id: req.user._id,
+        role: req.user.role,
+      },
+      "secretkey",
+      {
+        expiresIn: "7d",
+      }
+    );
+
+    const user = {
+      id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+      role: req.user.role,
+      phone: req.user.phone ?? "",
+    };
+
+    res.redirect(
+      `${process.env.CLIENT_URL}/google-success?token=${token}&user=${encodeURIComponent(
+        JSON.stringify(user)
+      )}`
+    );
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      error: err.message,
+    });
+  }
+};
+
+
+
+
+
+
+
