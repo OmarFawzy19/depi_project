@@ -99,14 +99,14 @@ const Admin = () => {
           {[
             { icon: Users, label: "Pending", value: pendingProperties.length },
             { icon: Home, label: "Listings", value: pendingProperties.length },
-            {
-              icon: DollarSign,
-              label: "Pending value",
-              value: `$${(
-                pendingProperties.reduce((s, p) => s + p.price, 0) / 1000
-              ).toFixed(0)}k`,
-            },
-            { icon: BarChart3, label: "Visits today", value: "1.2k" },
+            // {
+            //   icon: DollarSign,
+            //   label: "Pending value",
+            //   value: `$${(
+            //     pendingProperties.reduce((s, p) => s + p.price, 0) / 1000
+            //   ).toFixed(0)}k`,
+            // },
+            // { icon: BarChart3, label: "Visits today", value: "1.2k" },
           ].map((s) => (
             <div key={s.label} className="rounded-2xl bg-card p-5 shadow-card">
               <s.icon className="mb-3 h-6 w-6 text-primary" />
