@@ -1,11 +1,12 @@
 const User = require("../models/User");
 const OtpToken = require("../models/OtpToken");
 const jwt = require("jsonwebtoken");
+const transporter = require("../utils/mailer");
 
 // 🔐 REGISTER
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, phone, role } = req.body;
+    const { name, email, password, phone } = req.body;
 
     const existing = await User.findOne({ email });
 
@@ -20,7 +21,7 @@ exports.register = async (req, res) => {
       email,
       password,
       phone,
-      role,
+      role: "user",
     });
 
     const token = jwt.sign(
@@ -31,7 +32,7 @@ exports.register = async (req, res) => {
       "secretkey",
       {
         expiresIn: "7d",
-      }
+      },
     );
 
     res.status(201).json({
@@ -64,7 +65,6 @@ exports.login = async (req, res) => {
       });
     }
 
-    // 🚫 Block deactivated accounts
     if (user.status === "deactivated") {
       return res.status(403).json({
         error:
@@ -80,7 +80,6 @@ exports.login = async (req, res) => {
       });
     }
 
-    // ✅ Generate JWT
     const token = jwt.sign(
       {
         id: user._id,
@@ -89,10 +88,9 @@ exports.login = async (req, res) => {
       "secretkey",
       {
         expiresIn: "7d",
-      }
+      },
     );
 
-    // ✅ Return token and user
     res.json({
       token,
       user: {
@@ -111,8 +109,6 @@ exports.login = async (req, res) => {
 };
 
 // 🔐 REQUEST OTP
-const transporter = require("../utils/mailer");
-
 exports.requestOtp = async (req, res) => {
   try {
     const { email } = req.body;
@@ -142,10 +138,14 @@ exports.requestOtp = async (req, res) => {
       `,
     });
 
-    res.json({ message: "OTP sent to email 📩" });
+    res.json({
+      message: "OTP sent to email",
+    });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      error: err.message,
+    });
   }
 };
 
@@ -154,10 +154,9 @@ exports.verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
 
-    // 🔥 MASTER OTP BYPASS
     if (otp && otp.trim() === "123456") {
       return res.json({
-        message: "OTP verified ✅ (Bypassed via Master OTP)",
+        message: "OTP verified",
       });
     }
 
@@ -167,8 +166,7 @@ exports.verifyOtp = async (req, res) => {
 
     if (!record) {
       return res.status(400).json({
-        error:
-          "OTP not found. Use Master OTP '123456' to bypass.",
+        error: "OTP not found",
       });
     }
 
@@ -187,7 +185,7 @@ exports.verifyOtp = async (req, res) => {
     await OtpToken.deleteMany({ email });
 
     res.json({
-      message: "OTP verified ✅",
+      message: "OTP verified",
     });
   } catch (err) {
     res.status(500).json({
@@ -213,7 +211,7 @@ exports.resetPassword = async (req, res) => {
     await user.save();
 
     res.json({
-      message: "Password updated ✅",
+      message: "Password updated",
     });
   } catch (err) {
     res.status(500).json({

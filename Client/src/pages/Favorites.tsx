@@ -31,6 +31,7 @@ function normalize(p: ApiProperty): Property {
     images: p.images?.length > 0 ? p.images : ["/placeholder.svg"],
     features: p.features ?? [],
     status: p.status,
+    rejectionReason: p.rejectionReason,
     owner: {
       id: p.owner?._id ?? "",
       name: p.owner?.name ?? "Unknown",
@@ -38,6 +39,8 @@ function normalize(p: ApiProperty): Property {
       phone: "",
     },
     isFeatured: true,
+    views: p.views ?? 0,
+    inquiriesCount: p.inquiriesCount ?? 0,
     createdAt: p.createdAt,
     distance: p.distance,
   };

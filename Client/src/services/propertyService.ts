@@ -16,7 +16,10 @@ export interface ApiProperty {
   images: string[];
   features: string[];
   status: "pending" | "approved" | "rejected" | "paused";
+  rejectionReason?: string;
   owner: { _id: string; name: string; email: string };
+  views?: number;
+  inquiriesCount?: number;
   createdAt: string;
   distance?: number;
 }
@@ -37,8 +40,11 @@ export interface Property {
   images: string[];
   features: string[];
   status: string;
+  rejectionReason?: string;
   owner: { id: string; name: string; avatar: string; phone: string };
   isFeatured: boolean;
+  views: number;
+  inquiriesCount: number;
   createdAt: string;
   distance?: number;
 }
@@ -60,6 +66,7 @@ function normalize(p: ApiProperty): Property {
     images: p.images?.length > 0 ? p.images : ["/placeholder.svg"],
     features: p.features ?? [],
     status: p.status,
+    rejectionReason: p.rejectionReason,
     owner: {
       id: p.owner?._id ?? "",
       name: p.owner?.name ?? "Unknown",
@@ -67,6 +74,8 @@ function normalize(p: ApiProperty): Property {
       phone: "",
     },
     isFeatured: true,
+    views: p.views ?? 0,
+    inquiriesCount: p.inquiriesCount ?? 0,
     createdAt: p.createdAt,
     distance: p.distance,
   };
@@ -107,6 +116,17 @@ export const propertyService = {
   async getById(id: string): Promise<Property | undefined> {
     try {
       const { data } = await axiosClient.get<ApiProperty>(`/properties/${id}`);
+      return normalize(data);
+    } catch {
+      return undefined;
+    }
+  },
+
+  async incrementViews(id: string): Promise<Property | undefined> {
+    try {
+      const { data } = await axiosClient.patch<ApiProperty>(
+        `/properties/${id}/view`,
+      );
       return normalize(data);
     } catch {
       return undefined;

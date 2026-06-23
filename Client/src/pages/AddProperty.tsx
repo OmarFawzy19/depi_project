@@ -4,7 +4,6 @@ import {
   type FormEvent,
   type ReactNode,
 } from "react";
-import axiosClient from "@/lib/axiosClient";
 import { Upload, MapPin, Loader2 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -69,11 +68,70 @@ const AddProperty = () => {
 
   const handleImagesChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
-    setImages(Array.from(e.target.files));
+
+    const files = Array.from(e.target.files);
+
+    if (files.length > 10) {
+      toast({
+        title: "Too many images",
+        description: "Maximum 10 images allowed.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const oversized = files.find((file) => file.size > 5 * 1024 * 1024);
+
+    if (oversized) {
+      toast({
+        title: "Image too large",
+        description: "Each image must be less than 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setImages(files);
   };
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (formData.title.trim().length < 5) {
+      toast({
+        title: "Invalid title",
+        description: "Title must be at least 5 characters.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.price || Number(formData.price) <= 0) {
+      toast({
+        title: "Invalid price",
+        description: "Please enter a valid price.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.location.trim().length < 3) {
+      toast({
+        title: "Invalid location",
+        description: "Please enter a valid location.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (images.length === 0) {
+      toast({
+        title: "Images required",
+        description: "Please upload at least one image.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     if (!point) {
       toast({
@@ -84,6 +142,7 @@ const AddProperty = () => {
     }
 
     const token = localStorage.getItem("token");
+
     if (!token) {
       toast({
         title: "Not logged in",
@@ -96,42 +155,50 @@ const AddProperty = () => {
     try {
       setSubmitting(true);
 
-      // Upload images directly to Cloudinary (unsigned) — no backend CORS issues
       const uploadedImages: string[] = [];
-      for (const image of images) {
-        try {
-          const imageFormData = new FormData();
-          imageFormData.append("file", image);
-          imageFormData.append("upload_preset", "makany_unsigned");
 
-          const uploadResponse = await fetch(
-            "https://api.cloudinary.com/v1_1/dj1gq6vlo/image/upload",
-            { method: "POST", body: imageFormData }
-          );
-          const uploadData = await uploadResponse.json();
-          if (uploadData.secure_url) {
-            uploadedImages.push(uploadData.secure_url);
-          } else {
-            console.warn("Cloudinary upload returned no URL:", uploadData);
-          }
-        } catch (uploadErr) {
-          console.warn("Image upload failed for one file, skipping:", uploadErr);
+      for (const image of images) {
+        const imageFormData = new FormData();
+        imageFormData.append("file", image);
+        imageFormData.append("upload_preset", "makany_unsigned");
+
+        const uploadResponse = await fetch(
+          "https://api.cloudinary.com/v1_1/dj1gq6vlo/image/upload",
+          {
+            method: "POST",
+            body: imageFormData,
+          },
+        );
+
+        const uploadData = await uploadResponse.json();
+
+        if (uploadData.secure_url) {
+          uploadedImages.push(uploadData.secure_url);
         }
       }
 
+      if (uploadedImages.length === 0) {
+        toast({
+          title: "Image upload failed",
+          description: "Please try uploading the images again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       await propertyService.create({
-        title: formData.title,
-        description: formData.description,
+        title: formData.title.trim(),
+        description: formData.description.trim(),
         type: formData.type,
         price: Number(formData.price),
         priceType: formData.priceType,
         bedrooms: Number(formData.bedrooms || 0),
         bathrooms: Number(formData.bathrooms || 0),
         area: Number(formData.area || 0),
-        location: formData.location,
+        location: formData.location.trim(),
         lat: point.lat,
         lng: point.lng,
-        images: uploadedImages.length > 0 ? uploadedImages : ["/placeholder.svg"],
+        images: uploadedImages,
         features: [],
       });
 
@@ -208,7 +275,7 @@ const AddProperty = () => {
                 <p className="font-semibold">Click to upload images</p>
 
                 <p className="text-xs text-muted-foreground">
-                  PNG, JPG up to 10MB
+                  PNG, JPG up to 5MB - Maximum 10 images
                 </p>
 
                 <input
@@ -221,9 +288,22 @@ const AddProperty = () => {
               </label>
 
               {images.length > 0 && (
-                <p className="mt-3 text-sm text-muted-foreground">
-                  {images.length} image(s) selected
-                </p>
+                <div className="mt-4">
+                  <p className="mb-3 text-sm text-muted-foreground">
+                    {images.length} image(s) selected
+                  </p>
+
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    {images.map((image, index) => (
+                      <img
+                        key={index}
+                        src={URL.createObjectURL(image)}
+                        alt={`preview-${index}`}
+                        className="h-24 w-full rounded-lg border object-cover"
+                      />
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
 
@@ -265,6 +345,7 @@ const AddProperty = () => {
                     required
                     name="price"
                     type="number"
+                    min={1}
                     value={formData.price}
                     onChange={handleChange}
                     className={inputCls}
@@ -312,6 +393,7 @@ const AddProperty = () => {
                   <input
                     name="area"
                     type="number"
+                    min={0}
                     value={formData.area}
                     onChange={handleChange}
                     className={inputCls}
@@ -378,7 +460,7 @@ const AddProperty = () => {
               disabled={submitting}
             >
               {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-              Submit listing
+              {submitting ? "Submitting..." : "Submit listing"}
             </Button>
           </div>
         </form>
