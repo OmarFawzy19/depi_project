@@ -18,6 +18,7 @@ import EditProperty from "@/pages/EditProperty";
 import AddProperty from "@/pages/AddProperty";
 import AccountSettings from "@/pages/AccountSettings";
 import GoogleSuccess from "@/pages/GoogleSuccess";
+import AdminUsers from "@/pages/AdminUsers";
 export const AppRouter = () => {
   return (
     <BrowserRouter>
@@ -43,10 +44,7 @@ export const AppRouter = () => {
             </RoleRoute>
           }
         />
-<Route
-  path="/google-success"
-  element={<GoogleSuccess />}
-/>
+        <Route path="/google-success" element={<GoogleSuccess />} />
         <Route
           path="/add-property"
           element={
@@ -88,6 +86,14 @@ export const AppRouter = () => {
           element={
             <RoleRoute allowedRoles={["admin"]}>
               <Admin />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <RoleRoute allowedRoles={["admin"]}>
+              <AdminUsers />
             </RoleRoute>
           }
         />

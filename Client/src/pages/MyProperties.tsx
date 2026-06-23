@@ -147,6 +147,7 @@ function PropertyManagementCard({
       : fallbackImage;
 
   const isPaused = property.status === "paused";
+  const isRejected = property.status === "rejected";
 
   return (
     <motion.div
@@ -157,7 +158,7 @@ function PropertyManagementCard({
       <Card
         className={`overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-card-hover ${
           isPaused ? "opacity-70" : ""
-        }`}
+        } ${isRejected ? "border-red-300" : ""}`}
       >
         <div className="relative aspect-[4/3] overflow-hidden">
           <img
@@ -212,6 +213,18 @@ function PropertyManagementCard({
               </span>
             )}
           </p>
+
+          {isRejected && (
+            <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3">
+              <p className="mb-1 text-sm font-semibold text-red-700">
+                Rejection Reason
+              </p>
+
+              <p className="text-sm text-red-600">
+                {property.rejectionReason || "No reason provided"}
+              </p>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-2">
             <Link to={`/property/${property.id}`}>
