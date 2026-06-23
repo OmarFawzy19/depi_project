@@ -9,9 +9,13 @@ const {
   resetPassword,
 } = require("../controllers/authController");
 
+// ===============================
+// AUTH ROUTES
+// ===============================
 router.post("/register", register);
 router.post("/login", login);
 router.post("/request-otp", requestOtp);
 router.post("/verify-otp", verifyOtp);
 router.post("/reset-password", resetPassword);
+
 module.exports = router;

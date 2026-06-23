@@ -1,7 +1,6 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
-  Heart,
   Share2,
   MapPin,
   Bed,
@@ -13,6 +12,8 @@ import {
   Loader2,
   Edit,
   Home,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -34,30 +35,59 @@ const fallbackImage =
 const PropertyDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
   const [property, setProperty] = useState<Property | null>(null);
   const [similar, setSimilar] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+
   const { location: userLocation, request: requestLocation } = useGeolocation();
   const { user } = useAuth();
+
   const userId = user ? ((user as any)._id ?? user.id) : null;
-  const isOwner = !!(userId && property && userId.toString() === property.owner.id.toString());
+
+  const isOwner = !!(
+    userId &&
+    property &&
+    userId.toString() === property.owner.id.toString()
+  );
 
   useEffect(() => {
     if (!id) return;
 
     setLoading(true);
+    setActiveImageIndex(0);
 
     propertyService.getById(id).then((p) => {
-      setProperty(p ?? null);
+      if (!p) {
+        setProperty(null);
+        setLoading(false);
+        return;
+      }
+
+      const currentUserId = user ? ((user as any)._id ?? user.id) : null;
+
+      const ownerIsCurrentUser = !!(
+        currentUserId &&
+        p.owner?.id &&
+        currentUserId.toString() === p.owner.id.toString()
+      );
+
+      if (!ownerIsCurrentUser) {
+        propertyService.incrementViews(p.id).then((updatedProperty) => {
+          setProperty(updatedProperty ?? p);
+        });
+      } else {
+        setProperty(p);
+      }
+
       setLoading(false);
 
-      if (p) {
-        propertyService.list({ type: p.type }).then((all) => {
-          setSimilar(all.filter((s) => s.id !== p.id).slice(0, 3));
-        });
-      }
+      propertyService.list({ type: p.type }).then((all) => {
+        setSimilar(all.filter((s) => s.id !== p.id).slice(0, 3));
+      });
     });
-  }, [id]);
+  }, [id, user]);
 
   if (loading) {
     return (
@@ -86,10 +116,29 @@ const PropertyDetail = () => {
     );
   }
 
-  const propertyImage =
-    property.images?.[0] && property.images[0] !== "/placeholder.svg"
-      ? property.images[0]
-      : fallbackImage;
+  const galleryImages =
+    property.images?.filter((image) => image && image !== "/placeholder.svg") ??
+    [];
+
+  const displayImages =
+    galleryImages.length > 0 ? galleryImages : [fallbackImage];
+
+  const activeImage =
+    displayImages[activeImageIndex] ?? displayImages[0] ?? fallbackImage;
+
+  const hasMultipleImages = displayImages.length > 1;
+
+  const goToPreviousImage = () => {
+    setActiveImageIndex((prev) =>
+      prev === 0 ? displayImages.length - 1 : prev - 1,
+    );
+  };
+
+  const goToNextImage = () => {
+    setActiveImageIndex((prev) =>
+      prev === displayImages.length - 1 ? 0 : prev + 1,
+    );
+  };
 
   const distance = userLocation
     ? distanceKm(userLocation, { lat: property.lat, lng: property.lng })
@@ -110,15 +159,68 @@ const PropertyDetail = () => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="mb-8 overflow-hidden rounded-2xl"
+          className="mb-8"
         >
-          <img
-            src={propertyImage}
-            alt={property.title}
-            width={1200}
-            height={600}
-            className="aspect-[2/1] w-full object-cover"
-          />
+          <div className="relative flex justify-center rounded-2xl bg-muted p-4">
+            <img
+              src={activeImage}
+              alt={property.title}
+              width={1200}
+              height={600}
+              className="max-h-[500px] w-full rounded-2xl object-contain"
+            />
+
+            {hasMultipleImages && (
+              <>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="icon"
+                  onClick={goToPreviousImage}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-background/80 backdrop-blur-sm"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="icon"
+                  onClick={goToNextImage}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-background/80 backdrop-blur-sm"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </Button>
+
+                <div className="absolute bottom-4 right-4 rounded-full bg-background/80 px-3 py-1 text-xs font-semibold backdrop-blur-sm">
+                  {activeImageIndex + 1} / {displayImages.length}
+                </div>
+              </>
+            )}
+          </div>
+
+          {hasMultipleImages && (
+            <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
+              {displayImages.map((image, index) => (
+                <button
+                  key={`${image}-${index}`}
+                  type="button"
+                  onClick={() => setActiveImageIndex(index)}
+                  className={`h-20 w-28 flex-shrink-0 overflow-hidden rounded-xl border-2 bg-muted ${
+                    activeImageIndex === index
+                      ? "border-primary"
+                      : "border-transparent"
+                  }`}
+                >
+                  <img
+                    src={image}
+                    alt={`${property.title} ${index + 1}`}
+                    className="h-full w-full object-contain"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
         </motion.div>
 
         <div className="grid gap-8 lg:grid-cols-3">
@@ -252,16 +354,22 @@ const PropertyDetail = () => {
                 {isOwner ? (
                   <div className="flex flex-col gap-3 rounded-xl border border-border bg-accent/40 p-4 text-center">
                     <p className="text-xs text-muted-foreground font-medium">
-                      This is your property listing. You cannot contact yourself.
+                      This is your property listing. You cannot contact
+                      yourself.
                     </p>
-                    <Link to={`/edit-property/${property.id}`} className="w-full">
+
+                    <Link
+                      to={`/edit-property/${property.id}`}
+                      className="w-full"
+                    >
                       <Button className="w-full gap-2">
                         <Edit className="h-4 w-4" /> Edit Listing
                       </Button>
                     </Link>
-                    <Link to="/owner-dashboard" className="w-full">
+
+                    <Link to="/my-properties" className="w-full">
                       <Button variant="outline" className="w-full gap-2">
-                        <Home className="h-4 w-4" /> Go to Dashboard
+                        <Home className="h-4 w-4" /> Go to My Properties
                       </Button>
                     </Link>
                   </div>

@@ -1,16 +1,11 @@
 const Property = require("../models/Property");
 
-// ──────────────────────────────────────────
 // GET /api/properties
-// List approved properties only
-// ──────────────────────────────────────────
 exports.getProperties = async (req, res) => {
   try {
-    const filter = {};
+    const filter = { status: "approved" };
 
-    if (req.query.type) {
-      filter.type = req.query.type;
-    }
+    if (req.query.type) filter.type = req.query.type;
 
     if (req.query.minPrice || req.query.maxPrice) {
       filter.price = {};
@@ -41,9 +36,26 @@ exports.getProperties = async (req, res) => {
   }
 };
 
-// ──────────────────────────────────────────
+// GET /api/properties/all
+exports.getAllProperties = async (req, res) => {
+  try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({
+        error: "Access denied. Admin only.",
+      });
+    }
+
+    const properties = await Property.find()
+      .populate("owner", "name email")
+      .sort({ createdAt: -1 });
+
+    res.json(properties);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 // GET /api/properties/nearby
-// ──────────────────────────────────────────
 exports.getNearbyProperties = async (req, res) => {
   try {
     const { lat, lng, radius } = req.query;
@@ -84,9 +96,7 @@ exports.getNearbyProperties = async (req, res) => {
   }
 };
 
-// ──────────────────────────────────────────
 // GET /api/properties/:id
-// ──────────────────────────────────────────
 exports.getPropertyById = async (req, res) => {
   try {
     const property = await Property.findById(req.params.id).populate(
@@ -104,10 +114,7 @@ exports.getPropertyById = async (req, res) => {
   }
 };
 
-// ──────────────────────────────────────────
 // GET /api/properties/my/listings
-// Get current owner's properties only
-// ──────────────────────────────────────────
 exports.getMyProperties = async (req, res) => {
   try {
     const properties = await Property.find({ owner: req.user.id })
@@ -120,9 +127,7 @@ exports.getMyProperties = async (req, res) => {
   }
 };
 
-// ──────────────────────────────────────────
 // POST /api/properties
-// ──────────────────────────────────────────
 exports.createProperty = async (req, res) => {
   try {
     const property = await Property.create({
@@ -137,12 +142,7 @@ exports.createProperty = async (req, res) => {
   }
 };
 
-// ──────────────────────────────────────────
 // PUT /api/properties/:id
-// Update a property
-// Property must be paused before editing
-// After editing, status becomes pending again
-// ──────────────────────────────────────────
 exports.updateProperty = async (req, res) => {
   try {
     const property = await Property.findById(req.params.id);
@@ -152,9 +152,9 @@ exports.updateProperty = async (req, res) => {
     }
 
     if (property.owner.toString() !== req.user.id) {
-      return res
-        .status(403)
-        .json({ error: "Not allowed to update this property" });
+      return res.status(403).json({
+        error: "Not allowed to update this property",
+      });
     }
 
     if (property.status !== "paused") {
@@ -188,7 +188,6 @@ exports.updateProperty = async (req, res) => {
     property.status = "pending";
 
     const updatedProperty = await property.save();
-
     await updatedProperty.populate("owner", "name email");
 
     res.json(updatedProperty);
@@ -197,10 +196,7 @@ exports.updateProperty = async (req, res) => {
   }
 };
 
-// ──────────────────────────────────────────
 // DELETE /api/properties/:id
-// Delete a property
-// ──────────────────────────────────────────
 exports.deleteProperty = async (req, res) => {
   try {
     const property = await Property.findById(req.params.id);
@@ -225,10 +221,7 @@ exports.deleteProperty = async (req, res) => {
   }
 };
 
-// ──────────────────────────────────────────
 // PATCH /api/properties/:id/pause
-// Pause / unpause a property
-// ──────────────────────────────────────────
 exports.togglePauseProperty = async (req, res) => {
   try {
     const property = await Property.findById(req.params.id);
@@ -246,7 +239,6 @@ exports.togglePauseProperty = async (req, res) => {
     property.status = property.status === "paused" ? "approved" : "paused";
 
     const updatedProperty = await property.save();
-
     await updatedProperty.populate("owner", "name email");
 
     res.json(updatedProperty);
@@ -254,10 +246,28 @@ exports.togglePauseProperty = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+// ──────────────────────────────────────────
+// PATCH /api/properties/:id/view
+// Increment property views
+// ──────────────────────────────────────────
+exports.incrementPropertyViews = async (req, res) => {
+  try {
+    const property = await Property.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { views: 1 } },
+      { new: true },
+    ).populate("owner", "name email");
 
-// ──────────────────────────────────────────
-// Haversine formula
-// ──────────────────────────────────────────
+    if (!property) {
+      return res.status(404).json({ error: "Property not found" });
+    }
+
+    res.json(property);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 function haversineKm(lat1, lng1, lat2, lng2) {
   const R = 6371;
   const dLat = toRad(lat2 - lat1);

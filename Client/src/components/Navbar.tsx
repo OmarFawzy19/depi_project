@@ -8,19 +8,35 @@ import { useTheme } from "@/hooks/ThemeContext";
 import { UserDropdown } from "@/components/UserDropdown";
 import { cn } from "@/lib/utils";
 
-const navLinks = [
+const guestLinks = [
+  { label: "Home", path: "/" },
+  { label: "Properties", path: "/properties" },
+  { label: "Map", path: "/map" },
+];
+
+const userLinks = [
   { label: "Home", path: "/" },
   { label: "Properties", path: "/properties" },
   { label: "Map", path: "/map" },
   { label: "Favorites", path: "/favorites" },
 ];
 
+const adminLinks = [
+  { label: "Home", path: "/" },
+  { label: "Admin Panel", path: "/admin" },
+  { label: "Properties", path: "/properties" },
+];
+
 const isActivePath = (pathname: string, path: string) => {
   if (path === "/") return pathname === "/" || pathname === "/home";
+  if (path === "/admin") return pathname === "/admin";
   if (path === "/properties")
     return pathname === "/properties" || pathname.startsWith("/property/");
   if (path === "/my-properties")
-    return pathname === "/my-properties" || pathname.startsWith("/edit-property/");
+    return (
+      pathname === "/my-properties" ||
+      pathname.startsWith("/edit-property/")
+    );
   return pathname === path;
 };
 
@@ -30,9 +46,13 @@ export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
-  const links = user
-    ? [...navLinks, { label: "My Properties", path: "/my-properties" }]
-    : navLinks;
+  const isAdmin = user?.role === "admin";
+
+  const links = isAdmin
+    ? adminLinks
+    : user
+    ? [...userLinks, { label: "My Properties", path: "/my-properties" }]
+    : guestLinks;
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border/80 bg-card/90 shadow-sm backdrop-blur-xl">
@@ -45,6 +65,7 @@ export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-primary shadow-glow">
             <MapPin className="h-5 w-5 text-primary-foreground" />
           </div>
+
           <span className="font-heading text-xl font-bold text-gradient">
             Makany
           </span>
@@ -62,7 +83,7 @@ export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
                   "rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200",
                   active
                     ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 )}
               >
                 {link.label}
@@ -95,13 +116,16 @@ export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
             </div>
           )}
 
-          {/* Theme toggle — always visible */}
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleTheme}
             className="hidden rounded-xl md:flex"
-            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            aria-label={
+              theme === "dark"
+                ? "Switch to light mode"
+                : "Switch to dark mode"
+            }
           >
             {theme === "dark" ? (
               <Sun className="h-5 w-5 text-yellow-400" />
@@ -150,7 +174,7 @@ export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
                         "rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200",
                         active
                           ? "bg-primary text-primary-foreground shadow-sm"
-                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                       )}
                     >
                       {link.label}
@@ -161,21 +185,30 @@ export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
 
               {!hideAuth && (
                 <div className="mt-4 border-t border-border pt-4">
-                  {/* Mobile theme toggle */}
                   <button
                     onClick={toggleTheme}
-                    className="mb-3 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                    className="mb-3 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                   >
                     {theme === "dark" ? (
-                      <><Sun className="h-4 w-4 text-yellow-400" /> Light Mode</>
+                      <>
+                        <Sun className="h-4 w-4 text-yellow-400" />
+                        Light Mode
+                      </>
                     ) : (
-                      <><Moon className="h-4 w-4" /> Dark Mode</>
+                      <>
+                        <Moon className="h-4 w-4" />
+                        Dark Mode
+                      </>
                     )}
                   </button>
+
                   {!user ? (
                     <div className="grid gap-2">
                       <Button asChild variant="outline" className="rounded-xl">
-                        <Link to="/login" onClick={() => setMobileOpen(false)}>
+                        <Link
+                          to="/login"
+                          onClick={() => setMobileOpen(false)}
+                        >
                           Log in
                         </Link>
                       </Button>
@@ -191,13 +224,15 @@ export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
                     </div>
                   ) : (
                     <div className="grid gap-2">
-                      <Link
-                        to="/account-settings"
-                        onClick={() => setMobileOpen(false)}
-                        className="rounded-xl px-4 py-3 text-sm font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                      >
-                        Account Settings
-                      </Link>
+                      {!isAdmin && (
+                        <Link
+                          to="/account-settings"
+                          onClick={() => setMobileOpen(false)}
+                          className="rounded-xl px-4 py-3 text-sm font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                        >
+                          Account Settings
+                        </Link>
+                      )}
 
                       <Button
                         variant="destructive"

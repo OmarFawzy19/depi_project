@@ -30,18 +30,24 @@ const propertySchema = new mongoose.Schema({
   // ───────────── Details ─────────────
   bedrooms: { type: Number, default: 1, min: 0 },
   bathrooms: { type: Number, default: 1, min: 0 },
-  area: { type: Number, default: 0 }, // in m²
+  area: { type: Number, default: 0 },
 
   // ───────────── Location ─────────────
-  location: { type: String, default: "" }, // human-readable address
-  latitude: { type: Number, required: [true, "Latitude is required"] },
-  longitude: { type: Number, required: [true, "Longitude is required"] },
+  location: { type: String, default: "" },
+  latitude: {
+    type: Number,
+    required: [true, "Latitude is required"],
+  },
+  longitude: {
+    type: Number,
+    required: [true, "Longitude is required"],
+  },
 
   // ───────────── Media ─────────────
-  images: [{ type: String }], // URLs for property photos
+  images: [{ type: String }],
 
   // ───────────── Extras ─────────────
-  features: [{ type: String }], // e.g. ["Pool", "Gym", "Parking"]
+  features: [{ type: String }],
 
   // ───────────── Status & Ownership ─────────────
   status: {
@@ -49,10 +55,22 @@ const propertySchema = new mongoose.Schema({
     enum: ["pending", "approved", "rejected", "paused"],
     default: "pending",
   },
+
+  rejectionReason: {
+    type: String,
+    default: "",
+  },
+
   owner: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User", // references the User model
+    ref: "User",
     required: [true, "Owner is required"],
+  },
+
+  // ───────────── Statistics ─────────────
+  views: {
+    type: Number,
+    default: 0,
   },
 
   // ───────────── Timestamps ─────────────

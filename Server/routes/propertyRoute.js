@@ -12,6 +12,7 @@ const {
   updateProperty,
   deleteProperty,
   togglePauseProperty,
+  incrementPropertyViews,
 } = require("../controllers/propertyController");
 
 // Public routes
@@ -22,9 +23,15 @@ router.get("/nearby", getNearbyProperties);
 // Protected route: get current owner's properties only
 router.get("/my/listings", auth, getMyProperties);
 
-// Temporary test route: get all properties including pending
-router.get("/all", async (req, res) => {
+// Admin route: get all properties including pending / approved / rejected / paused
+router.get("/all", auth, async (req, res) => {
   try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({
+        message: "Access denied. Admin only.",
+      });
+    }
+
     const properties = await Property.find()
       .populate("owner", "name email")
       .sort({ createdAt: -1 });
@@ -34,6 +41,9 @@ router.get("/all", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Increment property views
+router.patch("/:id/view", incrementPropertyViews);
 
 router.get("/:id", getPropertyById);
 

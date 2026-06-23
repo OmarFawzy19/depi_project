@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import ProtectedRoute from "./ProtectedRoute";
+import RoleRoute from "./RoleRoute";
 import Index from "@/pages/Index";
 import Home from "@/pages/Home";
 import ForgotPassword from "@/pages/ForgetPassword";
@@ -16,7 +17,7 @@ import MyProperties from "@/pages/MyProperties";
 import EditProperty from "@/pages/EditProperty";
 import AddProperty from "@/pages/AddProperty";
 import AccountSettings from "@/pages/AccountSettings";
-
+import GoogleSuccess from "@/pages/GoogleSuccess";
 export const AppRouter = () => {
   return (
     <BrowserRouter>
@@ -33,50 +34,63 @@ export const AppRouter = () => {
         <Route path="/properties" element={<Properties />} />
         <Route path="/property/:id" element={<PropertyDetail />} />
         <Route path="/map" element={<MapSearch />} />
+
         <Route
           path="/favorites"
           element={
-            <ProtectedRoute>
+            <RoleRoute allowedRoles={["user"]}>
               <FavoritesPage />
-            </ProtectedRoute>
+            </RoleRoute>
           }
         />
-
+<Route
+  path="/google-success"
+  element={<GoogleSuccess />}
+/>
         <Route
           path="/add-property"
           element={
-            <ProtectedRoute>
+            <RoleRoute allowedRoles={["user"]}>
               <AddProperty />
-            </ProtectedRoute>
+            </RoleRoute>
           }
         />
 
         <Route
           path="/my-properties"
           element={
-            <ProtectedRoute>
+            <RoleRoute allowedRoles={["user"]}>
               <MyProperties />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/edit-property/:id"
-          element={
-            <ProtectedRoute>
-              <EditProperty />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/account-settings"
-          element={
-            <ProtectedRoute>
-              <AccountSettings />
-            </ProtectedRoute>
+            </RoleRoute>
           }
         />
 
-        <Route path="/admin" element={<Admin />} />
+        <Route
+          path="/edit-property/:id"
+          element={
+            <RoleRoute allowedRoles={["user"]}>
+              <EditProperty />
+            </RoleRoute>
+          }
+        />
+
+        <Route
+          path="/account-settings"
+          element={
+            <RoleRoute allowedRoles={["user"]}>
+              <AccountSettings />
+            </RoleRoute>
+          }
+        />
+
+        <Route
+          path="/admin"
+          element={
+            <RoleRoute allowedRoles={["admin"]}>
+              <Admin />
+            </RoleRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

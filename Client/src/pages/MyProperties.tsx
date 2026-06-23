@@ -24,20 +24,24 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { propertyService, type Property } from "@/services/propertyService";
-import { useAuth } from "@/hooks/AuthContext";
 
 const fallbackImage =
   "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop";
+
+type OwnerProperty = Property & {
+  views?: number;
+  inquiriesCount?: number;
+};
 
 const getStatusClass = (status: string) => {
   if (status === "approved") return "bg-green-500 text-white";
   if (status === "pending") return "bg-yellow-500 text-white";
   if (status === "paused") return "bg-gray-500 text-white";
+  if (status === "rejected") return "bg-red-500 text-white";
 
   return "";
 };
 
-/* ─── Empty State ───────────────────────────────────────────────── */
 function EmptyState() {
   return (
     <motion.div
@@ -50,9 +54,7 @@ function EmptyState() {
         <Building2 className="h-10 w-10 text-primary" />
       </div>
 
-      <h3 className="mb-2 font-heading text-xl font-bold">
-        No properties yet
-      </h3>
+      <h3 className="mb-2 font-heading text-xl font-bold">No properties yet</h3>
 
       <p className="mx-auto mb-8 max-w-sm text-muted-foreground">
         You haven't listed any properties. Start by adding your first property
@@ -70,7 +72,6 @@ function EmptyState() {
   );
 }
 
-/* ─── Loading Skeleton ──────────────────────────────────────────── */
 function LoadingSkeleton() {
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -92,7 +93,6 @@ function LoadingSkeleton() {
   );
 }
 
-/* ─── Statistics Card ───────────────────────────────────────────── */
 function StatCard({
   icon: Icon,
   label,
@@ -128,7 +128,6 @@ function StatCard({
   );
 }
 
-/* ─── Property Card ─────────────────────────────────────────────── */
 function PropertyManagementCard({
   property,
   deletingId,
@@ -136,7 +135,7 @@ function PropertyManagementCard({
   onDelete,
   onTogglePause,
 }: {
-  property: Property;
+  property: OwnerProperty;
   deletingId: string | null;
   pausingId: string | null;
   onDelete: (id: string) => void;
@@ -156,7 +155,9 @@ function PropertyManagementCard({
       layout
     >
       <Card
-        className={`overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-card-hover ${isPaused ? "opacity-70" : ""}`}
+        className={`overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-card-hover ${
+          isPaused ? "opacity-70" : ""
+        }`}
       >
         <div className="relative aspect-[4/3] overflow-hidden">
           <img
@@ -166,9 +167,7 @@ function PropertyManagementCard({
           />
 
           <div className="absolute left-3 top-3">
-            <Badge>
-              For {property.priceType === "rent" ? "Rent" : "Sale"}
-            </Badge>
+            <Badge>For {property.priceType === "rent" ? "Rent" : "Sale"}</Badge>
           </div>
 
           <div className="absolute right-3 top-3">
@@ -264,11 +263,8 @@ function PropertyManagementCard({
   );
 }
 
-/* ─── Main Page ─────────────────────────────────────────────────── */
 const MyProperties = () => {
-  const { user } = useAuth();
-
-  const [properties, setProperties] = useState<Property[]>([]);
+  const [properties, setProperties] = useState<OwnerProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [pausingId, setPausingId] = useState<string | null>(null);
@@ -279,7 +275,7 @@ const MyProperties = () => {
     propertyService
       .listMine()
       .then((data) => {
-        setProperties(data);
+        setProperties(data as OwnerProperty[]);
       })
       .catch(() => {
         setProperties([]);
@@ -292,6 +288,16 @@ const MyProperties = () => {
   useEffect(() => {
     loadProperties();
   }, []);
+
+  const totalViews = properties.reduce(
+    (sum, property) => sum + (property.views || 0),
+    0,
+  );
+
+  const totalInquiries = properties.reduce(
+    (sum, property) => sum + (property.inquiriesCount || 0),
+    0,
+  );
 
   const handleDelete = async (id: string) => {
     const confirmDelete = window.confirm(
@@ -321,7 +327,7 @@ const MyProperties = () => {
 
       setProperties((prev) =>
         prev.map((property) =>
-          property.id === id ? updatedProperty : property,
+          property.id === id ? (updatedProperty as OwnerProperty) : property,
         ),
       );
     } catch {
@@ -340,12 +346,12 @@ const MyProperties = () => {
     {
       icon: Eye,
       label: "Total Views",
-      value: "—",
+      value: totalViews,
     },
     {
       icon: Mail,
       label: "Total Inquiries",
-      value: "—",
+      value: totalInquiries,
     },
   ];
 
@@ -354,7 +360,6 @@ const MyProperties = () => {
       <Navbar />
 
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -379,7 +384,6 @@ const MyProperties = () => {
           )}
         </motion.div>
 
-        {/* Statistics */}
         {!loading && properties.length > 0 && (
           <div className="mb-8 grid gap-4 sm:grid-cols-3">
             {stats.map((s, i) => (
@@ -388,7 +392,6 @@ const MyProperties = () => {
           </div>
         )}
 
-        {/* Properties Section */}
         {!loading && properties.length > 0 && (
           <motion.h2
             initial={{ opacity: 0 }}

@@ -28,11 +28,13 @@ export const authService = {
   async register(
     name: string,
     email: string,
+    phone: string,
     password: string
   ): Promise<User> {
     const res = await axiosClient.post("/auth/register", {
       name,
       email,
+      phone,
       password,
       role: "user",
     });
@@ -48,6 +50,12 @@ export const authService = {
       email,
     });
   },
+
+  async requestOtp(email: string): Promise<void> {
+  await axiosClient.post("/auth/request-otp", {
+    email,
+  });
+},
 
   async verifyOtp(email: string, otp: string): Promise<void> {
     await axiosClient.post("/auth/verify-otp", {
@@ -65,6 +73,16 @@ export const authService = {
       password,
     });
   },
+async googleLogin(token: string): Promise<User> {
+  const res = await axiosClient.post("/auth/google-login", {
+    token,
+  });
+
+  localStorage.setItem("token", token);
+  localStorage.setItem("user", JSON.stringify(res.data.user));
+
+  return res.data.user;
+},
 
   logout(): void {
     localStorage.removeItem(TOKEN_KEY);

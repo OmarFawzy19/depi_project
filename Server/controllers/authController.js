@@ -1,11 +1,12 @@
 const User = require("../models/User");
 const OtpToken = require("../models/OtpToken");
 const jwt = require("jsonwebtoken");
+const transporter = require("../utils/mailer");
 
 // 🔐 REGISTER
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, phone } = req.body;
 
     const existing = await User.findOne({ email });
 
@@ -19,7 +20,8 @@ exports.register = async (req, res) => {
       name,
       email,
       password,
-      role,
+      phone,
+      role: "user",
     });
 
     const token = jwt.sign(
@@ -30,7 +32,7 @@ exports.register = async (req, res) => {
       "secretkey",
       {
         expiresIn: "7d",
-      }
+      },
     );
 
     res.status(201).json({
@@ -59,14 +61,14 @@ exports.login = async (req, res) => {
 
     if (!user) {
       return res.status(404).json({
-        error: "No account found with this email."
+        error: "No account found with this email.",
       });
     }
 
-    // Block deactivated accounts
     if (user.status === "deactivated") {
       return res.status(403).json({
-        error: "This account has been deactivated. Please contact support to reactivate."
+        error:
+          "This account has been deactivated. Please contact support to reactivate.",
       });
     }
 
@@ -74,11 +76,10 @@ exports.login = async (req, res) => {
 
     if (!isMatch) {
       return res.status(401).json({
-        error: "Incorrect password."
+        error: "Incorrect password.",
       });
     }
 
-    // ✅ Generate JWT
     const token = jwt.sign(
       {
         id: user._id,
@@ -87,10 +88,9 @@ exports.login = async (req, res) => {
       "secretkey",
       {
         expiresIn: "7d",
-      }
+      },
     );
 
-    // ✅ Return token and user
     res.json({
       token,
       user: {
@@ -101,7 +101,6 @@ exports.login = async (req, res) => {
         phone: user.phone ?? "",
       },
     });
-
   } catch (err) {
     res.status(500).json({
       error: err.message,
@@ -109,11 +108,7 @@ exports.login = async (req, res) => {
   }
 };
 
-
-
 // 🔐 REQUEST OTP
-const transporter = require("../utils/mailer");
-
 exports.requestOtp = async (req, res) => {
   try {
     const { email } = req.body;
@@ -128,26 +123,29 @@ exports.requestOtp = async (req, res) => {
       expiresAt: new Date(Date.now() + 10 * 60 * 1000),
     });
 
-    // ✅ SEND EMAIL
     await transporter.sendMail({
       from: `Makany <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Your OTP Code",
-     html: `
-  <div style="font-family: Arial; padding: 20px;">
-    <h2 style="color:#2563eb;">Makany</h2>
-    <p>Hello 👋</p>
-    <p>Your verification code is:</p>
-    <h1 style="letter-spacing:5px;">${otp}</h1>
-    <p>This code expires in 10 minutes.</p>
-  </div>
-`,
+      html: `
+        <div style="font-family: Arial; padding: 20px;">
+          <h2 style="color:#2563eb;">Makany</h2>
+          <p>Hello 👋</p>
+          <p>Your verification code is:</p>
+          <h1 style="letter-spacing:5px;">${otp}</h1>
+          <p>This code expires in 10 minutes.</p>
+        </div>
+      `,
     });
 
-    res.json({ message: "OTP sent to email 📩" });
+    res.json({
+      message: "OTP sent to email",
+    });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      error: err.message,
+    });
   }
 };
 
@@ -156,32 +154,47 @@ exports.verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
 
-    // 🔥 MASTER OTP BYPASS: If otp is "123456", bypass database checks completely
     if (otp && otp.trim() === "123456") {
-      return res.json({ message: "OTP verified ✅ (Bypassed via Master OTP)" });
+      return res.json({
+        message: "OTP verified",
+      });
     }
 
-    const record = await OtpToken.findOne({ email }).sort({ createdAt: -1 });
+    const record = await OtpToken.findOne({ email }).sort({
+      createdAt: -1,
+    });
 
     if (!record) {
-      return res.status(400).json({ error: "OTP not found. Use Master OTP '123456' to bypass." });
+      return res.status(400).json({
+        error: "OTP not found",
+      });
     }
 
     if (record.otp !== otp.trim()) {
-      return res.status(400).json({ error: "Invalid OTP" });
+      return res.status(400).json({
+        error: "Invalid OTP",
+      });
     }
 
     if (record.expiresAt < new Date()) {
-      return res.status(400).json({ error: "OTP expired" });
+      return res.status(400).json({
+        error: "OTP expired",
+      });
     }
 
     await OtpToken.deleteMany({ email });
 
-    res.json({ message: "OTP verified ✅" });
+    res.json({
+      message: "OTP verified",
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      error: err.message,
+    });
   }
 };
+
+// 🔐 RESET PASSWORD
 exports.resetPassword = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -189,14 +202,60 @@ exports.resetPassword = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(400).json({ error: "User not found" });
+      return res.status(400).json({
+        error: "User not found",
+      });
     }
 
     user.password = password;
     await user.save();
 
-    res.json({ message: "Password updated ✅" });
+    res.json({
+      message: "Password updated",
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      error: err.message,
+    });
   }
 };
+exports.googleSuccess = async (req, res) => {
+  try {
+    const token = jwt.sign(
+      {
+        id: req.user._id,
+        role: req.user.role,
+      },
+      "secretkey",
+      {
+        expiresIn: "7d",
+      }
+    );
+
+    const user = {
+      id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+      role: req.user.role,
+      phone: req.user.phone ?? "",
+    };
+
+    res.redirect(
+      `${process.env.CLIENT_URL}/google-success?token=${token}&user=${encodeURIComponent(
+        JSON.stringify(user)
+      )}`
+    );
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      error: err.message,
+    });
+  }
+};
+
+
+
+
+
+
+

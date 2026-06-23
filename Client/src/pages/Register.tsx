@@ -1,21 +1,19 @@
 import { Link, useNavigate } from "react-router-dom";
-import { MapPin, Mail, Lock, User, Loader2 } from "lucide-react";
+import { MapPin, Mail, Lock, User, Phone, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/AuthContext";
 import { getErrorMessage } from "@/lib/errorMessage";
+import { authService } from "@/services/authService";
 
 const Register = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  const { register } = useAuth();
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -23,15 +21,26 @@ const Register = () => {
     setLoading(true);
 
     try {
-      await register(name, email, password);
+  await authService.requestOtp(email);
 
-      toast({
-        title: "Account created successfully!",
-        description: "Welcome to Makany!",
-      });
+  localStorage.setItem(
+    "tempUser",
+    JSON.stringify({
+      name,
+      email,
+      phone,
+      password,
+      role: "user",
+    })
+  );
 
-      navigate("/home", { replace: true });
-    } catch (err) {
+  toast({
+    title: "OTP Sent",
+    description: "Please check your email.",
+  });
+
+  navigate("/verify-otp");
+} catch (err) {
       toast({
         title: "Registration failed",
         description: getErrorMessage(err, "Something went wrong."),
@@ -84,7 +93,24 @@ const Register = () => {
                 />
               </div>
             </div>
+<div>
+  <label className="mb-1 block text-sm font-medium">
+    Phone Number
+  </label>
 
+  <div className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-3">
+    <Phone className="h-4 w-4 text-muted-foreground" />
+
+    <input
+      type="tel"
+      placeholder="Enter your phone number"
+      value={phone}
+      onChange={(e) => setPhone(e.target.value)}
+      className="w-full bg-transparent text-sm focus:outline-none"
+      required
+    />
+  </div>
+</div>
             <div>
               <label className="mb-1 block text-sm font-medium">
                 Email

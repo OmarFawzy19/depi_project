@@ -3,6 +3,7 @@ import {
   type ReactNode,
   useContext,
   useState,
+  useEffect,
 } from "react";
 
 import { authService } from "@/services/authService";
@@ -14,6 +15,7 @@ interface AuthContextValue {
   register: (
     name: string,
     email: string,
+    phone: string,
     password: string
   ) => Promise<User>;
   logout: () => void;
@@ -27,7 +29,28 @@ export const AuthProvider = ({
 }: {
   children: ReactNode;
 }) => {
-  const [user, setUser] = useState<User | null>(authService.current());
+  const [user, setUser] = useState<User | null>(null);
+
+  // Always synchronize with localStorage whenever the provider mounts
+  useEffect(() => {
+    setUser(authService.current());
+  }, []);
+
+  useEffect(() => {
+    const syncUser = () => {
+      setUser(authService.current());
+    };
+
+    window.addEventListener("storage", syncUser);
+    window.addEventListener("google-login", syncUser);
+    window.addEventListener("focus", syncUser);
+
+    return () => {
+      window.removeEventListener("storage", syncUser);
+      window.removeEventListener("google-login", syncUser);
+      window.removeEventListener("focus", syncUser);
+    };
+  }, []);
 
   const login = async (
     email: string,
@@ -41,11 +64,13 @@ export const AuthProvider = ({
   const register = async (
     name: string,
     email: string,
+    phone: string,
     password: string
   ): Promise<User> => {
     const newUser = await authService.register(
       name,
       email,
+      phone,
       password
     );
 
@@ -53,16 +78,22 @@ export const AuthProvider = ({
     return newUser;
   };
 
-  const logout = (): void => {
+  const logout = () => {
     authService.logout();
     setUser(null);
   };
 
-  const updateUser = (updates: Partial<User>): void => {
+  const updateUser = (updates: Partial<User>) => {
     setUser((prev) => {
-      if (!prev) return prev;
-      const updated = { ...prev, ...updates };
+      if (!prev) return null;
+
+      const updated = {
+        ...prev,
+        ...updates,
+      };
+
       localStorage.setItem("user", JSON.stringify(updated));
+
       return updated;
     });
   };
