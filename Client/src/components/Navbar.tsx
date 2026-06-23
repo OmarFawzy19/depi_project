@@ -8,7 +8,13 @@ import { useTheme } from "@/hooks/ThemeContext";
 import { UserDropdown } from "@/components/UserDropdown";
 import { cn } from "@/lib/utils";
 
-const navLinks = [
+const guestLinks = [
+  { label: "Home", path: "/" },
+  { label: "Properties", path: "/properties" },
+  { label: "Map", path: "/map" },
+];
+
+const userLinks = [
   { label: "Home", path: "/" },
   { label: "Properties", path: "/properties" },
   { label: "Map", path: "/map" },
@@ -28,7 +34,8 @@ const isActivePath = (pathname: string, path: string) => {
     return pathname === "/properties" || pathname.startsWith("/property/");
   if (path === "/my-properties")
     return (
-      pathname === "/my-properties" || pathname.startsWith("/edit-property/")
+      pathname === "/my-properties" ||
+      pathname.startsWith("/edit-property/")
     );
   return pathname === path;
 };
@@ -44,8 +51,8 @@ export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
   const links = isAdmin
     ? adminLinks
     : user
-      ? [...navLinks, { label: "My Properties", path: "/my-properties" }]
-      : navLinks;
+    ? [...userLinks, { label: "My Properties", path: "/my-properties" }]
+    : guestLinks;
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border/80 bg-card/90 shadow-sm backdrop-blur-xl">
@@ -76,7 +83,7 @@ export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
                   "rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200",
                   active
                     ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 )}
               >
                 {link.label}
@@ -115,7 +122,9 @@ export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
             onClick={toggleTheme}
             className="hidden rounded-xl md:flex"
             aria-label={
-              theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+              theme === "dark"
+                ? "Switch to light mode"
+                : "Switch to dark mode"
             }
           >
             {theme === "dark" ? (
@@ -165,7 +174,7 @@ export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
                         "rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200",
                         active
                           ? "bg-primary text-primary-foreground shadow-sm"
-                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                       )}
                     >
                       {link.label}
@@ -196,7 +205,10 @@ export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
                   {!user ? (
                     <div className="grid gap-2">
                       <Button asChild variant="outline" className="rounded-xl">
-                        <Link to="/login" onClick={() => setMobileOpen(false)}>
+                        <Link
+                          to="/login"
+                          onClick={() => setMobileOpen(false)}
+                        >
                           Log in
                         </Link>
                       </Button>

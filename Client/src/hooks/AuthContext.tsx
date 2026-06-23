@@ -11,18 +11,14 @@ import type { User } from "@/types/User";
 
 interface AuthContextValue {
   user: User | null;
-
   login: (email: string, password: string) => Promise<User>;
-
   register: (
     name: string,
     email: string,
     phone: string,
     password: string
   ) => Promise<User>;
-
   logout: () => void;
-
   updateUser: (updates: Partial<User>) => void;
 }
 
@@ -33,7 +29,12 @@ export const AuthProvider = ({
 }: {
   children: ReactNode;
 }) => {
-  const [user, setUser] = useState<User | null>(authService.current());
+  const [user, setUser] = useState<User | null>(null);
+
+  // Always synchronize with localStorage whenever the provider mounts
+  useEffect(() => {
+    setUser(authService.current());
+  }, []);
 
   useEffect(() => {
     const syncUser = () => {
@@ -42,10 +43,12 @@ export const AuthProvider = ({
 
     window.addEventListener("storage", syncUser);
     window.addEventListener("google-login", syncUser);
+    window.addEventListener("focus", syncUser);
 
     return () => {
       window.removeEventListener("storage", syncUser);
       window.removeEventListener("google-login", syncUser);
+      window.removeEventListener("focus", syncUser);
     };
   }, []);
 
@@ -54,9 +57,7 @@ export const AuthProvider = ({
     password: string
   ): Promise<User> => {
     const loggedInUser = await authService.login(email, password);
-
     setUser(loggedInUser);
-
     return loggedInUser;
   };
 
@@ -74,18 +75,17 @@ export const AuthProvider = ({
     );
 
     setUser(newUser);
-
     return newUser;
   };
 
-  const logout = (): void => {
+  const logout = () => {
     authService.logout();
     setUser(null);
   };
 
-  const updateUser = (updates: Partial<User>): void => {
+  const updateUser = (updates: Partial<User>) => {
     setUser((prev) => {
-      if (!prev) return prev;
+      if (!prev) return null;
 
       const updated = {
         ...prev,
