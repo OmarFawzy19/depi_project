@@ -29,15 +29,20 @@ const adminLinks = [
 
 const isActivePath = (pathname: string, path: string) => {
   if (path === "/") return pathname === "/" || pathname === "/home";
+
   if (path === "/admin") return pathname === "/admin";
+
+  if (path === "/admin/users") return pathname === "/admin/users";
+
   if (path === "/properties")
     return pathname === "/properties" || pathname.startsWith("/property/");
+
   if (path === "/my-properties")
     return (
       pathname === "/my-properties" || pathname.startsWith("/edit-property/")
     );
+
   return pathname === path;
-  if (path === "/admin/users") return pathname === "/admin/users";
 };
 
 export function Navbar({ hideAuth = false }: { hideAuth?: boolean }) {
