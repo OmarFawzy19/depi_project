@@ -16,6 +16,7 @@ const enquiryRoutes = require("./routes/enquiryRoutes");
 const uploadRoute = require("./routes/uploadRoute");
 const userRoutes = require("./routes/userRoute");
 const contactRoutes = require("./routes/contactRoute");
+const chatRoutes = require("./routes/chatRoute");
 
 const auth = require("./middleware/auth");
 
@@ -27,6 +28,7 @@ app.use(cors({
     "http://localhost:8081",
     "http://localhost:5173",
     "http://localhost:3000",
+    "http://localhost:8082",
   ],
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
@@ -47,6 +49,7 @@ app.use("/api/enquiries", enquiryRoutes);
 app.use("/api/upload", uploadRoute);
 app.use("/api/user", userRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api/chat", chatRoutes);
 
 // =======================
 // TEST ROUTE (protected)
