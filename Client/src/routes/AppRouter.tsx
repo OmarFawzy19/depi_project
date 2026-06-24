@@ -19,6 +19,7 @@ import AddProperty from "@/pages/AddProperty";
 import AccountSettings from "@/pages/AccountSettings";
 import GoogleSuccess from "@/pages/GoogleSuccess";
 import AdminUsers from "@/pages/AdminUsers";
+import { ChatWidget } from "@/components/ChatWidget";
 export const AppRouter = () => {
   return (
     <BrowserRouter>
@@ -98,6 +99,7 @@ export const AppRouter = () => {
           }
         />
       </Routes>
+      <ChatWidget />
     </BrowserRouter>
   );
 };
