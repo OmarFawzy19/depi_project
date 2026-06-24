@@ -4,7 +4,7 @@ import {
   type FormEvent,
   type ReactNode,
 } from "react";
-import { Upload, MapPin, Loader2 } from "lucide-react";
+import { Upload, MapPin, Loader2, Navigation } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -54,6 +54,82 @@ const AddProperty = () => {
 
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [geoLoading, setGeoLoading] = useState(false);
+
+  const useMyLocation = () => {
+    if (!navigator.geolocation) {
+      toast({
+        title: "Geolocation not supported",
+        description: "Your browser doesn't support location detection.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setGeoLoading(true);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        // Set map pin
+        setPoint({ lat: latitude, lng: longitude });
+
+        // Reverse geocode to fill location field
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=en`
+          );
+          const data = await res.json();
+
+          if (data?.address) {
+            const addr = data.address;
+            const locationName = [
+              addr.suburb || addr.neighbourhood || addr.district || "",
+              addr.city || addr.town || addr.state || "",
+              addr.country || "",
+            ]
+              .filter(Boolean)
+              .join(", ");
+
+            if (locationName) {
+              setFormData((prev) => ({ ...prev, location: locationName }));
+            }
+          }
+        } catch {
+          // Reverse geocoding failed — not critical, pin is still set
+        }
+
+        toast({
+          title: "Location detected ✅",
+          description: `Coordinates: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
+        });
+
+        setGeoLoading(false);
+      },
+      (error) => {
+        setGeoLoading(false);
+        let msg = "Could not get your location.";
+        if (error.code === error.PERMISSION_DENIED) {
+          msg = "Please allow location access in your browser settings.";
+        } else if (error.code === error.POSITION_UNAVAILABLE) {
+          msg = "Location information is unavailable.";
+        } else if (error.code === error.TIMEOUT) {
+          msg = "Location request timed out. Try again.";
+        }
+        toast({
+          title: "Location error",
+          description: msg,
+          variant: "destructive",
+        });
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000,
+      }
+    );
+  };
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
@@ -428,12 +504,28 @@ const AddProperty = () => {
 
           <div className="space-y-6">
             <div className="rounded-2xl bg-card p-6 shadow-card">
-              <h2 className="mb-2 font-heading text-lg font-semibold">
-                Pin location
-              </h2>
+              <div className="mb-2 flex items-center justify-between">
+                <h2 className="font-heading text-lg font-semibold">
+                  Pin location
+                </h2>
+
+                <button
+                  type="button"
+                  onClick={useMyLocation}
+                  disabled={geoLoading}
+                  className="flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/5 px-3 py-1.5 text-xs font-semibold text-primary transition-all duration-200 hover:bg-primary/10 hover:border-primary/50 hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {geoLoading ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Navigation className="h-3.5 w-3.5" />
+                  )}
+                  {geoLoading ? "Detecting..." : "Use My Location"}
+                </button>
+              </div>
 
               <p className="mb-3 text-xs text-muted-foreground">
-                Click on the map to place your property.
+                Click on the map or use your current location to pin your property.
               </p>
 
               <PropertyMap
@@ -441,6 +533,7 @@ const AddProperty = () => {
                 selectable
                 onSelect={(lat, lng) => setPoint({ lat, lng })}
                 selectedPoint={point}
+                userLocation={point}
                 height="320px"
               />
 
