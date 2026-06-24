@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import Modal from "@/components/shared/Modal";
 import { api } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
 
 type Property = {
   _id: string;
@@ -20,6 +21,7 @@ type Property = {
 };
 
 const Admin = () => {
+  const { toast } = useToast();
   const [pendingProperties, setPendingProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState<string | null>(null);
@@ -34,7 +36,10 @@ const Admin = () => {
       setPendingProperties(data);
     } catch (err) {
       console.error(err);
-      alert("Failed to load pending properties");
+      toast({
+        title: "Failed to load pending properties",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -52,10 +57,16 @@ const Admin = () => {
 
       setPendingProperties((prev) => prev.filter((p) => p._id !== id));
 
-      alert("Property approved successfully");
+      toast({
+        title: "Property approved successfully",
+        variant: "success",
+      });
     } catch (err) {
       console.error(err);
-      alert("Failed to approve property");
+      toast({
+        title: "Failed to approve property",
+        variant: "destructive",
+      });
     } finally {
       setActionId(null);
     }
@@ -71,7 +82,10 @@ const Admin = () => {
     if (!rejectingId) return;
 
     if (!rejectReason || rejectReason.trim() === "") {
-      alert("Rejection reason is required");
+      toast({
+        title: "Rejection reason is required",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -86,9 +100,17 @@ const Admin = () => {
 
       setRejectModalOpen(false);
       setRejectingId(null);
+
+      toast({
+        title: "Property rejected successfully",
+        variant: "success",
+      });
     } catch (err) {
       console.error(err);
-      alert("Failed to reject property");
+      toast({
+        title: "Failed to reject property",
+        variant: "destructive",
+      });
     } finally {
       setActionId(null);
     }
@@ -110,14 +132,6 @@ const Admin = () => {
           {[
             { icon: Users, label: "Pending", value: pendingProperties.length },
             { icon: Home, label: "Listings", value: pendingProperties.length },
-            // {
-            //   icon: DollarSign,
-            //   label: "Pending value",
-            //   value: `$${(
-            //     pendingProperties.reduce((s, p) => s + p.price, 0) / 1000
-            //   ).toFixed(0)}k`,
-            // },
-            // { icon: BarChart3, label: "Visits today", value: "1.2k" },
           ].map((s) => (
             <div key={s.label} className="rounded-2xl bg-card p-5 shadow-card">
               <s.icon className="mb-3 h-6 w-6 text-primary" />

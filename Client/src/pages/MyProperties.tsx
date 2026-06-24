@@ -24,6 +24,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { propertyService, type Property } from "@/services/propertyService";
+import Modal from "@/components/shared/Modal";
+import { useToast } from "@/hooks/use-toast";
 
 const fallbackImage =
   "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop";
@@ -281,6 +283,9 @@ const MyProperties = () => {
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [pausingId, setPausingId] = useState<string | null>(null);
+const { toast } = useToast();
+const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   const loadProperties = () => {
     setLoading(true);
@@ -312,43 +317,52 @@ const MyProperties = () => {
     0,
   );
 
-  const handleDelete = async (id: string) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this property?",
+  const openDeleteConfirm = (id: string) => {
+  setDeleteTargetId(id);
+  setDeleteConfirmOpen(true);
+};
+
+const confirmDelete = async () => {
+  if (!deleteTargetId) return;
+  setDeleteConfirmOpen(false);
+
+  try {
+    setDeletingId(deleteTargetId);
+
+    await propertyService.remove(deleteTargetId);
+
+    setProperties((prev) =>
+      prev.filter((property) => property.id !== deleteTargetId),
     );
 
-    if (!confirmDelete) return;
-
-    try {
-      setDeletingId(id);
-
-      await propertyService.remove(id);
-
-      setProperties((prev) => prev.filter((property) => property.id !== id));
-    } catch {
-      alert("Failed to delete property");
-    } finally {
-      setDeletingId(null);
-    }
-  };
+    toast({ title: "Property deleted successfully", variant: "success" });
+  } catch {
+    toast({ title: "Failed to delete property", variant: "destructive" });
+  } finally {
+    setDeletingId(null);
+    setDeleteTargetId(null);
+  }
+};
 
   const handleTogglePause = async (id: string) => {
-    try {
-      setPausingId(id);
+  try {
+    setPausingId(id);
 
-      const updatedProperty = await propertyService.togglePause(id);
+    const updatedProperty = await propertyService.togglePause(id);
 
-      setProperties((prev) =>
-        prev.map((property) =>
-          property.id === id ? (updatedProperty as OwnerProperty) : property,
-        ),
-      );
-    } catch {
-      alert("Failed to update property status");
-    } finally {
-      setPausingId(null);
-    }
-  };
+    setProperties((prev) =>
+      prev.map((property) =>
+        property.id === id ? (updatedProperty as OwnerProperty) : property,
+      ),
+    );
+
+    toast({ title: "Property status updated", variant: "success" });
+  } catch {
+    toast({ title: "Failed to update property status", variant: "destructive" });
+  } finally {
+    setPausingId(null);
+  }
+};
 
   const stats = [
     {
@@ -427,7 +441,7 @@ const MyProperties = () => {
                 property={property}
                 deletingId={deletingId}
                 pausingId={pausingId}
-                onDelete={handleDelete}
+                onDelete={openDeleteConfirm}
                 onTogglePause={handleTogglePause}
               />
             ))}
@@ -436,6 +450,18 @@ const MyProperties = () => {
       </div>
 
       <Footer />
+
+      <Modal
+        show={deleteConfirmOpen}
+        title="Delete Property"
+        onClose={() => setDeleteConfirmOpen(false)}
+        onConfirm={confirmDelete}
+        confirmText="Delete"
+      >
+        <p className="text-sm text-muted-foreground">
+          Are you sure you want to delete this property?
+        </p>
+      </Modal>
     </div>
   );
 };

@@ -1,19 +1,23 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
-import axios from "axios";
+import axiosClient from "@/lib/axiosClient";
 import { useNavigate, useParams } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import Modal from "@/components/shared/Modal";
 import { propertyService } from "@/services/propertyService";
+import { useToast } from "@/hooks/use-toast";
 
 const EditProperty = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [currentImages, setCurrentImages] = useState<string[]>([]);
   const [newImage, setNewImage] = useState<File | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -35,7 +39,10 @@ const EditProperty = () => {
       }
 
       if (property.status !== "paused") {
-        alert("You must pause this property before editing it.");
+        toast({
+          title: "You must pause this property before editing it.",
+          variant: "destructive",
+        });
         navigate("/my-properties");
         return;
       }
@@ -71,16 +78,15 @@ const EditProperty = () => {
     setNewImage(e.target.files[0]);
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-
     if (!id) return;
+    setConfirmOpen(true);
+  };
 
-    const confirmUpdate = window.confirm(
-      "After saving changes, this property status will return to Pending and will need admin approval again. Do you want to continue?",
-    );
-
-    if (!confirmUpdate) return;
+  const confirmSubmit = async () => {
+    if (!id) return;
+    setConfirmOpen(false);
 
     try {
       setSaving(true);
@@ -91,8 +97,8 @@ const EditProperty = () => {
         const imageFormData = new FormData();
         imageFormData.append("image", newImage);
 
-        const uploadResponse = await axios.post(
-          "http://localhost:5000/api/upload",
+        const uploadResponse = await axiosClient.post(
+          "/upload",
           imageFormData,
         );
 
@@ -110,11 +116,15 @@ const EditProperty = () => {
         images: updatedImages,
       });
 
-      alert("Property updated successfully and sent for admin approval.");
+      toast({
+        title: "Property updated successfully",
+        description: "Sent for admin approval.",
+        variant: "success",
+      });
 
       navigate("/my-properties");
     } catch {
-      alert("Failed to update property");
+      toast({ title: "Failed to update property", variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -244,6 +254,19 @@ const EditProperty = () => {
       </div>
 
       <Footer />
+
+      <Modal
+        show={confirmOpen}
+        title="Confirm Update"
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={confirmSubmit}
+        confirmText="Save Changes"
+      >
+        <p className="text-sm text-muted-foreground">
+          After saving changes, this property status will return to Pending
+          and will need admin approval again. Do you want to continue?
+        </p>
+      </Modal>
     </div>
   );
 };

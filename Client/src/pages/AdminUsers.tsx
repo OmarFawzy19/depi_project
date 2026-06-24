@@ -3,7 +3,9 @@ import { Users, Pause, Play, Trash2, Home } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import Modal from "@/components/shared/Modal";
 import { api } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
 
 type AdminUser = {
   _id: string;
@@ -16,10 +18,17 @@ type AdminUser = {
   createdAt: string;
 };
 
+type ConfirmAction = "pause" | "remove" | null;
+
 const AdminUsers = () => {
+  const { toast } = useToast();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState<string | null>(null);
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null);
+  const [confirmTargetId, setConfirmTargetId] = useState<string | null>(null);
 
   const loadUsers = async () => {
     try {
@@ -28,7 +37,7 @@ const AdminUsers = () => {
       setUsers(data);
     } catch (err) {
       console.error(err);
-      alert("Failed to load users");
+      toast({ title: "Failed to load users", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -38,10 +47,13 @@ const AdminUsers = () => {
     loadUsers();
   }, []);
 
-  const handlePause = async (id: string) => {
-    const ok = window.confirm("Are you sure you want to pause this user?");
-    if (!ok) return;
+  const openConfirm = (action: ConfirmAction, id: string) => {
+    setConfirmAction(action);
+    setConfirmTargetId(id);
+    setConfirmOpen(true);
+  };
 
+  const handlePause = async (id: string) => {
     try {
       setActionId(id);
       await api.put(`/admin/users/${id}/pause`, {});
@@ -50,9 +62,10 @@ const AdminUsers = () => {
           user._id === id ? { ...user, status: "deactivated" } : user,
         ),
       );
+      toast({ title: "User paused successfully", variant: "success" });
     } catch (err) {
       console.error(err);
-      alert("Failed to pause user");
+      toast({ title: "Failed to pause user", variant: "destructive" });
     } finally {
       setActionId(null);
     }
@@ -67,31 +80,41 @@ const AdminUsers = () => {
           user._id === id ? { ...user, status: "active" } : user,
         ),
       );
+      toast({ title: "User activated successfully", variant: "success" });
     } catch (err) {
       console.error(err);
-      alert("Failed to activate user");
+      toast({ title: "Failed to activate user", variant: "destructive" });
     } finally {
       setActionId(null);
     }
   };
 
   const handleRemove = async (id: string) => {
-    const ok = window.confirm(
-      "This will remove the user and all related properties. Continue?",
-    );
-
-    if (!ok) return;
-
     try {
       setActionId(id);
       await api.del(`/admin/users/${id}`);
       setUsers((prev) => prev.filter((user) => user._id !== id));
+      toast({ title: "User removed successfully", variant: "success" });
     } catch (err) {
       console.error(err);
-      alert("User must be paused before removing");
+      toast({ title: "User must be paused before removing", variant: "destructive" });
     } finally {
       setActionId(null);
     }
+  };
+
+  const handleConfirm = () => {
+    if (!confirmTargetId) return;
+
+    if (confirmAction === "pause") {
+      handlePause(confirmTargetId);
+    } else if (confirmAction === "remove") {
+      handleRemove(confirmTargetId);
+    }
+
+    setConfirmOpen(false);
+    setConfirmAction(null);
+    setConfirmTargetId(null);
   };
 
   return (
@@ -193,7 +216,7 @@ const AdminUsers = () => {
                             size="sm"
                             variant="outline"
                             disabled={actionId === user._id}
-                            onClick={() => handlePause(user._id)}
+                            onClick={() => openConfirm("pause", user._id)}
                           >
                             <Pause className="mr-1 h-4 w-4" />
                             Pause
@@ -217,7 +240,7 @@ const AdminUsers = () => {
                             actionId === user._id ||
                             user.status !== "deactivated"
                           }
-                          onClick={() => handleRemove(user._id)}
+                          onClick={() => openConfirm("remove", user._id)}
                         >
                           <Trash2 className="mr-1 h-4 w-4" />
                           Remove
@@ -233,6 +256,20 @@ const AdminUsers = () => {
       </div>
 
       <Footer />
+
+      <Modal
+        show={confirmOpen}
+        title={confirmAction === "pause" ? "Pause User" : "Remove User"}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleConfirm}
+        confirmText={confirmAction === "pause" ? "Pause" : "Remove"}
+      >
+        <p className="text-sm text-muted-foreground">
+          {confirmAction === "pause"
+            ? "Are you sure you want to pause this user?"
+            : "This will remove the user and all related properties. Continue?"}
+        </p>
+      </Modal>
     </div>
   );
 };

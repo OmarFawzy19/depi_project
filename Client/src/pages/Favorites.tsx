@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import axiosClient from "@/lib/axiosClient";
+import { useToast } from "@/hooks/use-toast";
 import { PropertyCard } from "@/components/PropertyCard";
 import type { ApiProperty, Property } from "@/services/propertyService";
 import { removeFavorite } from "@/services/favoritesService";
@@ -50,6 +51,7 @@ const Favorites = () => {
   const [favorites, setFavorites] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const loadFavorites = () => {
     setLoading(true);
@@ -76,18 +78,20 @@ const Favorites = () => {
   }, []);
 
   const handleRemove = async (id: string) => {
-    try {
-      setRemovingId(id);
+  try {
+    setRemovingId(id);
 
-      await removeFavorite(id);
+    await removeFavorite(id);
 
-      setFavorites((prev) => prev.filter((property) => property.id !== id));
-    } catch {
-      alert("Failed to remove from favorites");
-    } finally {
-      setRemovingId(null);
-    }
-  };
+    setFavorites((prev) => prev.filter((property) => property.id !== id));
+
+    toast({ title: "Removed from favorites", variant: "success" });
+  } catch {
+    toast({ title: "Failed to remove from favorites", variant: "destructive" });
+  } finally {
+    setRemovingId(null);
+  }
+};
 
   return (
     <div className="min-h-screen bg-background">
