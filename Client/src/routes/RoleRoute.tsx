@@ -13,8 +13,12 @@ const RoleRoute = ({ children, allowedRoles }: RoleRouteProps) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (!allowedRoles.includes(user.role)) {
-    if (user.role === "admin") {
+  // Fallback to "user" if role is missing (for older sessions)
+  const role = String(user.role || "user").toLowerCase().trim();
+  const normalizedAllowedRoles = allowedRoles.map(r => String(r).toLowerCase().trim());
+
+  if (!normalizedAllowedRoles.includes(role)) {
+    if (role === "admin") {
       return <Navigate to="/admin" replace />;
     }
 

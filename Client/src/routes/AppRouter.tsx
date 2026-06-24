@@ -39,7 +39,7 @@ export const AppRouter = () => {
         <Route
           path="/favorites"
           element={
-            <RoleRoute allowedRoles={["user"]}>
+            <RoleRoute allowedRoles={["user", "admin", "seeker", "owner"]}>
               <FavoritesPage />
             </RoleRoute>
           }
@@ -48,7 +48,7 @@ export const AppRouter = () => {
         <Route
           path="/add-property"
           element={
-            <RoleRoute allowedRoles={["user"]}>
+            <RoleRoute allowedRoles={["user", "admin", "seeker", "owner"]}>
               <AddProperty />
             </RoleRoute>
           }
@@ -57,7 +57,7 @@ export const AppRouter = () => {
         <Route
           path="/my-properties"
           element={
-            <RoleRoute allowedRoles={["user"]}>
+            <RoleRoute allowedRoles={["user", "admin", "seeker", "owner"]}>
               <MyProperties />
             </RoleRoute>
           }
@@ -66,7 +66,7 @@ export const AppRouter = () => {
         <Route
           path="/edit-property/:id"
           element={
-            <RoleRoute allowedRoles={["user"]}>
+            <RoleRoute allowedRoles={["user", "admin", "seeker", "owner"]}>
               <EditProperty />
             </RoleRoute>
           }
@@ -75,7 +75,7 @@ export const AppRouter = () => {
         <Route
           path="/account-settings"
           element={
-            <RoleRoute allowedRoles={["user"]}>
+            <RoleRoute allowedRoles={["user", "admin", "seeker", "owner"]}>
               <AccountSettings />
             </RoleRoute>
           }
