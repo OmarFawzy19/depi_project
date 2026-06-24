@@ -3,6 +3,7 @@ import { Users, Home, DollarSign, BarChart3, Check, X } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import Modal from "@/components/shared/Modal";
 import { api } from "@/services/api";
 
 type Property = {
@@ -22,6 +23,9 @@ const Admin = () => {
   const [pendingProperties, setPendingProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState<string | null>(null);
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
 
   const fetchPending = async () => {
     try {
@@ -57,24 +61,31 @@ const Admin = () => {
     }
   };
 
-  const handleReject = async (id: string) => {
-    const reason = prompt("Enter rejection reason:");
+  const openRejectModal = (id: string) => {
+    setRejectingId(id);
+    setRejectReason("");
+    setRejectModalOpen(true);
+  };
 
-    if (!reason || reason.trim() === "") {
+  const confirmReject = async () => {
+    if (!rejectingId) return;
+
+    if (!rejectReason || rejectReason.trim() === "") {
       alert("Rejection reason is required");
       return;
     }
 
     try {
-      setActionId(id);
+      setActionId(rejectingId);
 
-      await api.put(`/admin/properties/${id}/reject`, {
-        reason: reason.trim(),
+      await api.put(`/admin/properties/${rejectingId}/reject`, {
+        reason: rejectReason.trim(),
       });
 
-      setPendingProperties((prev) => prev.filter((p) => p._id !== id));
+      setPendingProperties((prev) => prev.filter((p) => p._id !== rejectingId));
 
-      alert("Property rejected successfully");
+      setRejectModalOpen(false);
+      setRejectingId(null);
     } catch (err) {
       console.error(err);
       alert("Failed to reject property");
@@ -171,7 +182,7 @@ const Admin = () => {
                           className="bg-red-600 text-white hover:bg-red-700"
                           size="sm"
                           disabled={actionId === p._id}
-                          onClick={() => handleReject(p._id)}
+                          onClick={() => openRejectModal(p._id)}
                         >
                           <X className="mr-1 h-4 w-4" />
                           Reject
@@ -187,6 +198,22 @@ const Admin = () => {
       </div>
 
       <Footer />
+
+      <Modal
+        show={rejectModalOpen}
+        title="Rejection Reason"
+        onClose={() => setRejectModalOpen(false)}
+        onConfirm={confirmReject}
+        confirmText="Reject Property"
+      >
+        <textarea
+          value={rejectReason}
+          onChange={(e) => setRejectReason(e.target.value)}
+          placeholder="Enter rejection reason here..."
+          className="w-full rounded-lg border border-border bg-background p-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          rows={1}
+        />
+      </Modal>
     </div>
   );
 };
