@@ -39,8 +39,8 @@ type TabId = (typeof tabs)[number]["id"];
 
 /* ─── Profile Tab ───────────────────────────────────────────────── */
 function ProfileTab({ user, onUserUpdate }: {
-  user: { name: string; email: string; phone?: string };
-  onUserUpdate: (updated: { name: string; email: string; phone?: string }) => void;
+  user: { name: string; email: string; phone: string };
+  onUserUpdate: (updated: { name: string; email: string; phone: string }) => void;
 }) {
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
