@@ -20,6 +20,7 @@ import AccountSettings from "@/pages/AccountSettings";
 import GoogleSuccess from "@/pages/GoogleSuccess";
 import AdminUsers from "@/pages/AdminUsers";
 import { ChatWidget } from "@/components/ChatWidget";
+import LoginUnlockOtp from "@/pages/LoginUnlockOtp";
 export const AppRouter = () => {
   return (
     <BrowserRouter>
@@ -28,6 +29,7 @@ export const AppRouter = () => {
         <Route path="/home" element={<Home />} />
 
         <Route path="/login" element={<Login />} />
+        <Route path="/login-unlock-otp" element={<LoginUnlockOtp />} />
         <Route path="/verify-otp" element={<VerifyOtp />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />

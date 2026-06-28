@@ -9,6 +9,8 @@ const {
   verifyOtp,
   resetPassword,
   googleSuccess,
+  requestUnlockOtp,
+  verifyUnlockOtp,
 } = require("../controllers/authController");
 
 // ===============================
@@ -26,7 +28,6 @@ router.get(
     scope: ["profile", "email"],
   })
 );
-
 router.get(
   "/google/callback",
   passport.authenticate("google", {
@@ -35,4 +36,6 @@ router.get(
   }),
   googleSuccess
 );
+router.post("/request-unlock-otp", requestUnlockOtp);
+router.post("/verify-unlock-otp", verifyUnlockOtp);
 module.exports = router;

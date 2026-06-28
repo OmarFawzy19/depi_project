@@ -71,14 +71,42 @@ exports.login = async (req, res) => {
           "This account has been deactivated. Please contact support to reactivate.",
       });
     }
+    // Check if account is locked
+if (user.lockUntil && user.lockUntil > Date.now()) {
+  const minutes = Math.ceil(
+    (user.lockUntil - Date.now()) / (1000 * 60)
+  );
+
+  return res.status(403).json({
+  error: `Account locked. Try again in ${minutes} minute(s).`,
+  locked: true,
+});
+}
 
     const isMatch = await user.comparePassword(password);
+if (!isMatch) {
+  user.loginAttempts += 1;
 
-    if (!isMatch) {
-      return res.status(401).json({
-        error: "Incorrect password.",
-      });
-    }
+  if (user.loginAttempts >= 5) {
+    user.lockUntil = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    user.loginAttempts = 0;
+
+    await user.save();
+
+    return res.status(403).json({
+  error: "Too many failed login attempts.",
+  locked: true,
+});
+  }
+
+  await user.save();
+
+  return res.status(401).json({
+    error: `Incorrect password. ${
+      5 - user.loginAttempts
+    } attempt(s) remaining.`,
+  });
+}
 
     const token = jwt.sign(
       {
@@ -90,7 +118,10 @@ exports.login = async (req, res) => {
         expiresIn: "7d",
       },
     );
-
+// Reset failed login attempts
+user.loginAttempts = 0;
+user.lockUntil = null;
+await user.save();
     res.json({
       token,
       user: {
@@ -194,6 +225,114 @@ exports.verifyOtp = async (req, res) => {
   }
 };
 
+// 🔓 SEND UNLOCK OTP
+exports.requestUnlockOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        error: "User not found.",
+      });
+    }
+
+    if (!user.lockUntil || user.lockUntil < Date.now()) {
+      return res.status(400).json({
+        error: "Your account is not locked.",
+      });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    await OtpToken.deleteMany({ email });
+
+    await OtpToken.create({
+      email,
+      otp,
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+    });
+
+    await transporter.sendMail({
+      from: `Makany <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Unlock Your Makany Account",
+      html: `
+        <div style="font-family:Arial;padding:20px">
+          <h2 style="color:#2563eb">Makany</h2>
+
+          <p>Your account has been temporarily locked because of multiple failed login attempts.</p>
+
+          <p>Enter this verification code to unlock it immediately:</p>
+
+          <h1 style="letter-spacing:5px">${otp}</h1>
+
+          <p>This code expires in 10 minutes.</p>
+        </div>
+      `,
+    });
+
+    res.json({
+      message: "Unlock OTP sent successfully.",
+    });
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({
+      error: err.message,
+    });
+  }
+};
+
+// 🔓 VERIFY UNLOCK OTP
+exports.verifyUnlockOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    const record = await OtpToken.findOne({ email }).sort({
+      createdAt: -1,
+    });
+
+    if (!record) {
+      return res.status(400).json({
+        error: "OTP not found.",
+      });
+    }
+
+    if (record.otp !== otp.trim()) {
+      return res.status(400).json({
+        error: "Invalid OTP.",
+      });
+    }
+
+    if (record.expiresAt < new Date()) {
+      return res.status(400).json({
+        error: "OTP expired.",
+      });
+    }
+
+    const user = await User.findOne({ email });
+
+    user.loginAttempts = 0;
+    user.lockUntil = null;
+
+    await user.save();
+
+    await OtpToken.deleteMany({ email });
+
+    res.json({
+      message: "Account unlocked successfully.",
+    });
+
+  } catch (err) {
+
+    res.status(500).json({
+      error: err.message,
+    });
+  }
+};
+
 // 🔐 RESET PASSWORD
 exports.resetPassword = async (req, res) => {
   try {
@@ -252,10 +391,3 @@ exports.googleSuccess = async (req, res) => {
     });
   }
 };
-
-
-
-
-
-
-

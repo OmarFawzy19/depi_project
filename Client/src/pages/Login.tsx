@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { getErrorMessage } from "@/lib/errorMessage";
+import { authService } from "@/services/authService";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -52,13 +53,43 @@ const Login = () => {
       navigate(state?.from?.pathname ?? "/home", {
         replace: true,
       });
-    } catch (err) {
+    } catch (err: any) {
+
+  if (err?.response?.data?.locked) {
+    try {
+      localStorage.setItem("unlockEmail", email);
+
+      await authService.requestUnlockOtp(email);
+
       toast({
-        title: "Login failed",
-        description: getErrorMessage(err, "Unable to sign in."),
+        title: "Account Locked",
+        description:
+          "An unlock verification code has been sent to your email.",
+      });
+
+      navigate("/login-unlock-otp");
+      return;
+    } catch (otpErr) {
+      toast({
+        title: "Couldn't send OTP",
+        description: getErrorMessage(
+          otpErr,
+          "Please try again later."
+        ),
         variant: "destructive",
       });
-    } finally {
+
+      return;
+    }
+  }
+
+  toast({
+    title: "Login failed",
+    description: getErrorMessage(err, "Unable to sign in."),
+    variant: "destructive",
+  });
+
+} finally {
       setLoading(false);
     }
   };

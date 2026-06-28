@@ -12,7 +12,18 @@ export const authService = {
       return null;
     }
   },
+async requestUnlockOtp(email: string): Promise<void> {
+  await axiosClient.post("/auth/request-unlock-otp", {
+    email,
+  });
+},
 
+async verifyUnlockOtp(email: string, otp: string): Promise<void> {
+  await axiosClient.post("/auth/verify-unlock-otp", {
+    email,
+    otp,
+  });
+},
   async login(email: string, password: string): Promise<User> {
     const res = await axiosClient.post("/auth/login", {
       email,

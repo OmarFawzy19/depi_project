@@ -16,14 +16,25 @@ const userSchema = new mongoose.Schema({
     default: "user",
   },
   status: {
-    type: String,
-    enum: ["active", "deactivated"],
-    default: "active",
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
+  type: String,
+  enum: ["active", "deactivated"],
+  default: "active",
+},
+
+loginAttempts: {
+  type: Number,
+  default: 0,
+},
+
+lockUntil: {
+  type: Date,
+  default: null,
+},
+
+createdAt: {
+  type: Date,
+  default: Date.now,
+},
 });
 
 // 🔥 HASH PASSWORD BEFORE SAVE
