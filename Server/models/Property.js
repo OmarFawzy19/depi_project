@@ -72,6 +72,10 @@ const propertySchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  inquiriesCount: {
+    type: Number,
+    default: 0,
+  },
 
   // ───────────── Timestamps ─────────────
   createdAt: {

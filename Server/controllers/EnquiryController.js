@@ -28,6 +28,9 @@ exports.sendEnquiry = async (req, res) => {
         message: req.body.message
     });
 
+    // Increment inquiries count
+    await Property.findByIdAndUpdate(property._id, { $inc: { inquiriesCount: 1 } });
+
     const buyerName = buyer ? (buyer.name || buyer.email) : "A potential buyer";
     const propertyTitle = property.title || "a property";
 
