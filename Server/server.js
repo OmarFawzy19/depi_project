@@ -4,6 +4,9 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 
+const passport = require("passport");
+require("./config/passport");
+
 const logger = require("./middleware/logger");
 const errorHandler = require("./middleware/errorHandler");
 const rateLimiter = require("./middleware/rateLimiter");
@@ -21,6 +24,7 @@ const chatRoutes = require("./routes/chatRoute");
 const auth = require("./middleware/auth");
 
 const app = express();
+app.use(passport.initialize());
 
 app.use(cors({
   origin: [
