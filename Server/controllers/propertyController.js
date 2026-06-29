@@ -134,6 +134,7 @@ exports.createProperty = async (req, res) => {
       ...req.body,
       owner: req.user.id,
       status: "pending",
+      previousStatus: null,
     });
 
     res.status(201).json(property);
@@ -186,6 +187,8 @@ exports.updateProperty = async (req, res) => {
     });
 
     property.status = "pending";
+    property.previousStatus = null;
+    property.rejectionReason = "";
 
     const updatedProperty = await property.save();
     await updatedProperty.populate("owner", "name email");
@@ -236,7 +239,13 @@ exports.togglePauseProperty = async (req, res) => {
       });
     }
 
-    property.status = property.status === "paused" ? "approved" : "paused";
+    if (property.status !== "paused") {
+      property.previousStatus = property.status;
+      property.status = "paused";
+    } else {
+      property.status = property.previousStatus || "pending";
+      property.previousStatus = null;
+    }
 
     const updatedProperty = await property.save();
     await updatedProperty.populate("owner", "name email");
@@ -246,10 +255,8 @@ exports.togglePauseProperty = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-// ──────────────────────────────────────────
+
 // PATCH /api/properties/:id/view
-// Increment property views
-// ──────────────────────────────────────────
 exports.incrementPropertyViews = async (req, res) => {
   try {
     const property = await Property.findByIdAndUpdate(

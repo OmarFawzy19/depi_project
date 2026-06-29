@@ -1,6 +1,7 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import axiosClient from "@/lib/axiosClient";
 import { useNavigate, useParams } from "react-router-dom";
+import { Trash2 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,7 @@ const EditProperty = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [currentImages, setCurrentImages] = useState<string[]>([]);
-  const [newImage, setNewImage] = useState<File | null>(null);
+  const [newImages, setNewImages] = useState<File[]>([]);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -57,10 +58,14 @@ const EditProperty = () => {
         location: property.location,
       });
 
-      setCurrentImages(property.images || []);
+      setCurrentImages(
+        property.images?.filter((img) => img && img !== "/placeholder.svg") ||
+          [],
+      );
+
       setLoading(false);
     });
-  }, [id, navigate]);
+  }, [id, navigate, toast]);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -73,46 +78,115 @@ const EditProperty = () => {
     }));
   };
 
-  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files?.[0]) return;
-    setNewImage(e.target.files[0]);
+  const handleImagesChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+
+    const files = Array.from(e.target.files);
+
+    if (files.length > 10) {
+      toast({
+        title: "Too many images",
+        description: "You can add maximum 10 pictures at once.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const oversized = files.find((file) => file.size > 5 * 1024 * 1024);
+
+    if (oversized) {
+      toast({
+        title: "Image too large",
+        description: "Each image must be less than 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setNewImages(files);
+  };
+
+  const removeCurrentImage = (imageUrl: string) => {
+    setCurrentImages((prev) => prev.filter((img) => img !== imageUrl));
+  };
+
+  const removeNewImage = (index: number) => {
+    setNewImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
+
     if (!id) return;
+
+    if (formData.title.trim().length < 5) {
+      toast({
+        title: "Invalid title",
+        description: "Title must be at least 5 characters.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.price || Number(formData.price) <= 0) {
+      toast({
+        title: "Invalid price",
+        description: "Please enter a valid price.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.location.trim().length < 3) {
+      toast({
+        title: "Invalid location",
+        description: "Please enter a valid location.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (currentImages.length === 0 && newImages.length === 0) {
+      toast({
+        title: "Images required",
+        description: "Please keep or add at least one picture.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setConfirmOpen(true);
   };
 
   const confirmSubmit = async () => {
     if (!id) return;
+
     setConfirmOpen(false);
 
     try {
       setSaving(true);
 
-      let updatedImages = currentImages;
+      const updatedImages = [...currentImages];
 
-      if (newImage) {
+      for (const image of newImages) {
         const imageFormData = new FormData();
-        imageFormData.append("image", newImage);
+        imageFormData.append("image", image);
 
-        const uploadResponse = await axiosClient.post(
-          "/upload",
-          imageFormData,
-        );
+        const uploadResponse = await axiosClient.post("/upload", imageFormData);
 
-        updatedImages = [uploadResponse.data.imageUrl];
+        if (uploadResponse.data.imageUrl) {
+          updatedImages.push(uploadResponse.data.imageUrl);
+        }
       }
 
       await propertyService.update(id, {
-        title: formData.title,
-        description: formData.description,
+        title: formData.title.trim(),
+        description: formData.description.trim(),
         price: Number(formData.price),
-        bedrooms: Number(formData.bedrooms),
-        bathrooms: Number(formData.bathrooms),
-        area: Number(formData.area),
-        location: formData.location,
+        bedrooms: Number(formData.bedrooms || 0),
+        bathrooms: Number(formData.bathrooms || 0),
+        area: Number(formData.area || 0),
+        location: formData.location.trim(),
         images: updatedImages,
       });
 
@@ -123,8 +197,14 @@ const EditProperty = () => {
       });
 
       navigate("/my-properties");
-    } catch {
-      toast({ title: "Failed to update property", variant: "destructive" });
+    } catch (err) {
+      console.error(err);
+
+      toast({
+        title: "Failed to update property",
+        description: "Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setSaving(false);
     }
@@ -139,12 +219,6 @@ const EditProperty = () => {
     );
   }
 
-  const previewImage = newImage
-    ? URL.createObjectURL(newImage)
-    : currentImages?.[0] && currentImages[0] !== "/placeholder.svg"
-      ? currentImages[0]
-      : "";
-
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -156,96 +230,179 @@ const EditProperty = () => {
           onSubmit={handleSubmit}
           className="space-y-4 rounded-2xl bg-card p-6 shadow-card"
         >
-          {previewImage && (
+          {currentImages.length > 0 && (
             <div>
               <p className="mb-2 text-sm font-medium text-muted-foreground">
-                Current Image
+                Current Property Pictures
               </p>
 
-              <img
-                src={previewImage}
-                alt="Property"
-                className="h-56 w-full rounded-xl object-cover"
-              />
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {currentImages.map((image) => (
+                  <div
+                    key={image}
+                    className="relative overflow-hidden rounded-xl"
+                  >
+                    <img
+                      src={image}
+                      alt="Property"
+                      className="h-32 w-full rounded-xl object-cover"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => removeCurrentImage(image)}
+                      className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-red-600 text-white shadow-md transition hover:bg-red-700"
+                      title="Delete image"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
           <div>
             <p className="mb-2 text-sm font-medium text-muted-foreground">
-              Change Image
+              Add More Property Pictures
             </p>
 
             <input
               type="file"
               accept="image/*"
-              onChange={handleImageChange}
+              multiple
+              onChange={handleImagesChange}
               className={inputCls}
             />
           </div>
 
-          <input
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            className={inputCls}
-            placeholder="Title"
-            required
-          />
+          {newImages.length > 0 && (
+            <div>
+              <p className="mb-2 text-sm font-medium text-muted-foreground">
+                New Pictures Preview
+              </p>
 
-          <input
-            name="price"
-            type="number"
-            value={formData.price}
-            onChange={handleChange}
-            className={inputCls}
-            placeholder="Price"
-            required
-          />
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {newImages.map((image, index) => (
+                  <div
+                    key={`${image.name}-${index}`}
+                    className="relative overflow-hidden rounded-xl"
+                  >
+                    <img
+                      src={URL.createObjectURL(image)}
+                      alt={`New preview ${index + 1}`}
+                      className="h-32 w-full rounded-xl object-cover"
+                    />
 
-          <input
-            name="bedrooms"
-            type="number"
-            value={formData.bedrooms}
-            onChange={handleChange}
-            className={inputCls}
-            placeholder="Bedrooms"
-          />
+                    <button
+                      type="button"
+                      onClick={() => removeNewImage(index)}
+                      className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-red-600 text-white shadow-md transition hover:bg-red-700"
+                      title="Delete new image"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
-          <input
-            name="bathrooms"
-            type="number"
-            value={formData.bathrooms}
-            onChange={handleChange}
-            className={inputCls}
-            placeholder="Bathrooms"
-          />
+          <div>
+            <label className="mb-2 block text-sm font-medium">
+              Property Title
+            </label>
 
-          <input
-            name="area"
-            type="number"
-            value={formData.area}
-            onChange={handleChange}
-            className={inputCls}
-            placeholder="Area"
-          />
+            <input
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              className={inputCls}
+              placeholder="Enter property title"
+              required
+            />
+          </div>
 
-          <input
-            name="location"
-            value={formData.location}
-            onChange={handleChange}
-            className={inputCls}
-            placeholder="Location"
-            required
-          />
+          <div>
+            <label className="mb-2 block text-sm font-medium">Price</label>
 
-          <textarea
-            name="description"
-            rows={4}
-            value={formData.description}
-            onChange={handleChange}
-            className={inputCls}
-            placeholder="Description"
-          />
+            <input
+              name="price"
+              type="number"
+              value={formData.price}
+              onChange={handleChange}
+              className={inputCls}
+              placeholder="Enter property price"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium">Bedrooms</label>
+
+            <input
+              name="bedrooms"
+              type="number"
+              value={formData.bedrooms}
+              onChange={handleChange}
+              className={inputCls}
+              placeholder="Number of bedrooms"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium">Bathrooms</label>
+
+            <input
+              name="bathrooms"
+              type="number"
+              value={formData.bathrooms}
+              onChange={handleChange}
+              className={inputCls}
+              placeholder="Number of bathrooms"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium">Area (m²)</label>
+
+            <input
+              name="area"
+              type="number"
+              value={formData.area}
+              onChange={handleChange}
+              className={inputCls}
+              placeholder="Property area"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium">Location</label>
+
+            <input
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+              className={inputCls}
+              placeholder="Location"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium">
+              Description
+            </label>
+
+            <textarea
+              name="description"
+              rows={4}
+              value={formData.description}
+              onChange={handleChange}
+              className={inputCls}
+              placeholder="Property description"
+            />
+          </div>
 
           <Button type="submit" disabled={saving}>
             {saving ? "Saving..." : "Save Changes"}
@@ -263,8 +420,8 @@ const EditProperty = () => {
         confirmText="Save Changes"
       >
         <p className="text-sm text-muted-foreground">
-          After saving changes, this property status will return to Pending
-          and will need admin approval again. Do you want to continue?
+          After saving changes, this property status will return to Pending and
+          will need admin approval again. Do you want to continue?
         </p>
       </Modal>
     </div>

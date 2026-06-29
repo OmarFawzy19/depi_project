@@ -4,7 +4,7 @@ import {
   type FormEvent,
   type ReactNode,
 } from "react";
-import { Upload, MapPin, Loader2, Navigation } from "lucide-react";
+import { Upload, MapPin, Loader2, Navigation, Trash2 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -78,7 +78,7 @@ const AddProperty = () => {
         // Reverse geocode to fill location field
         try {
           const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=en`
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=en`,
           );
           const data = await res.json();
 
@@ -127,7 +127,7 @@ const AddProperty = () => {
         enableHighAccuracy: true,
         timeout: 10000,
         maximumAge: 60000,
-      }
+      },
     );
   };
 
@@ -140,6 +140,10 @@ const AddProperty = () => {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const removeSelectedImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleImagesChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -167,7 +171,7 @@ const AddProperty = () => {
       return;
     }
 
-    setImages(files);
+    setImages((prev) => [...prev, ...files].slice(0, 10));
   };
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -371,12 +375,24 @@ const AddProperty = () => {
 
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                     {images.map((image, index) => (
-                      <img
-                        key={index}
-                        src={URL.createObjectURL(image)}
-                        alt={`preview-${index}`}
-                        className="h-24 w-full rounded-lg border object-cover"
-                      />
+                      <div
+                        key={`${image.name}-${index}`}
+                        className="relative overflow-hidden rounded-lg"
+                      >
+                        <img
+                          src={URL.createObjectURL(image)}
+                          alt={`preview-${index}`}
+                          className="h-24 w-full rounded-lg border object-cover"
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() => removeSelectedImage(index)}
+                          className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-red-600 text-white shadow-md hover:bg-red-700"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -525,7 +541,8 @@ const AddProperty = () => {
               </div>
 
               <p className="mb-3 text-xs text-muted-foreground">
-                Click on the map or use your current location to pin your property.
+                Click on the map or use your current location to pin your
+                property.
               </p>
 
               <PropertyMap
