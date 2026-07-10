@@ -1,7 +1,6 @@
 const Property = require("../models/Property");
 const User = require("../models/User");
 
-// GET /api/admin/properties/pending
 exports.getPendingProperties = async (req, res) => {
   try {
     const properties = await Property.find({ status: "pending" })
@@ -14,7 +13,6 @@ exports.getPendingProperties = async (req, res) => {
   }
 };
 
-// PUT /api/admin/properties/:id/approve
 exports.approveProperty = async (req, res) => {
   try {
     const property = await Property.findByIdAndUpdate(
@@ -36,7 +34,6 @@ exports.approveProperty = async (req, res) => {
   }
 };
 
-// PUT /api/admin/properties/:id/reject
 exports.rejectProperty = async (req, res) => {
   try {
     const { reason } = req.body;
@@ -69,7 +66,6 @@ exports.rejectProperty = async (req, res) => {
   }
 };
 
-// GET /api/admin/users
 exports.getUsersWithPropertiesCount = async (req, res) => {
   try {
     const users = await User.find({ role: "user" })
@@ -101,7 +97,6 @@ exports.getUsersWithPropertiesCount = async (req, res) => {
   }
 };
 
-// PUT /api/admin/users/:id/pause
 exports.pauseUser = async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(
@@ -123,7 +118,6 @@ exports.pauseUser = async (req, res) => {
   }
 };
 
-// PUT /api/admin/users/:id/activate
 exports.activateUser = async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(
@@ -145,7 +139,6 @@ exports.activateUser = async (req, res) => {
   }
 };
 
-// DELETE /api/admin/users/:id
 exports.removeUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);

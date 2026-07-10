@@ -42,9 +42,6 @@ app.use(express.json());
 app.use(logger);
 app.use(rateLimiter);
 
-// =======================
-// ROUTES
-// =======================
 app.use("/api/auth", authRoutes);
 app.use("/api/properties", propertyRoutes);
 app.use("/api/admin", adminRoutes);
@@ -55,42 +52,25 @@ app.use("/api/user", userRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/chat", chatRoutes);
 
-// =======================
-// TEST ROUTE (protected)
-// =======================
+
 app.get("/api/test", auth, (req, res) => {
   res.json({ msg: "Protected works", user: req.user });
 });
 
-// =======================
-// TEST ROUTE
-// =======================
 app.get("/", (req, res) => {
   res.json({ status: "ok" });
 });
 
-// =======================
-// 404 HANDLER
-// =======================
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });
 });
 
-// =======================
-// ERROR HANDLER
-// =======================
 app.use(errorHandler);
 
-// =======================
-// DB CONNECTION
-// =======================
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected ✅"))
   .catch((err) => console.log(err));
 
-// =======================
-// SERVER
-// =======================
 const PORT = 5000;
 app.listen(PORT, () => console.log("Server running on port 5000 🚀"));

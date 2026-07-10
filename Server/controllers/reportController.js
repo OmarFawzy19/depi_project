@@ -2,7 +2,6 @@ const Report = require("../models/Report");
 const ApiError = require("../utils/ApiError");
 const asyncHandler = require("../utils/asyncHandler");
 
-// POST /api/reports/:propertyId
 exports.reportProperty = asyncHandler(async (req, res) => {
   const { reason } = req.body;
 
@@ -19,7 +18,6 @@ exports.reportProperty = asyncHandler(async (req, res) => {
   res.status(201).json({ message: "Report submitted ✅", report });
 });
 
-// GET /api/reports — admin only
 exports.getReports = asyncHandler(async (req, res) => {
   const reports = await Report.find()
     .populate("property", "title")
