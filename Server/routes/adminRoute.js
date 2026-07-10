@@ -13,14 +13,12 @@ const {
   removeUser,
 } = require("../controllers/adminController");
 
-// كل الـ routes دي محتاجة login + admin role
 router.use(auth, roleMiddleware("admin"));
 
 router.get("/properties/pending", getPendingProperties);
 router.put("/properties/:id/approve", approveProperty);
 router.put("/properties/:id/reject", rejectProperty);
 
-// Admin users management
 router.get("/users", getUsersWithPropertiesCount);
 router.put("/users/:id/pause", pauseUser);
 router.put("/users/:id/activate", activateUser);
