@@ -1,7 +1,7 @@
 const User = require("../models/User");
 const OtpToken = require("../models/OtpToken");
 const jwt = require("jsonwebtoken");
-const transporter = require("../utils/mailer");
+const sendEmail = require("../utils/sendEmail");
 
 // 🔐 REGISTER
 exports.register = async (req, res) => {
@@ -154,11 +154,12 @@ exports.requestOtp = async (req, res) => {
       expiresAt: new Date(Date.now() + 10 * 60 * 1000),
     });
 
-    await transporter.sendMail({
-      from: `Makany <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: "Your OTP Code",
-      html: `
+    await sendEmail(
+      email,
+      "Your OTP Code",
+      `Your Makany verification code is: ${otp}. It expires in 10 minutes.`,
+      null,
+      `
         <div style="font-family: Arial; padding: 20px;">
           <h2 style="color:#2563eb;">Makany</h2>
           <p>Hello 👋</p>
@@ -166,8 +167,8 @@ exports.requestOtp = async (req, res) => {
           <h1 style="letter-spacing:5px;">${otp}</h1>
           <p>This code expires in 10 minutes.</p>
         </div>
-      `,
-    });
+      `
+    );
 
     res.json({
       message: "OTP sent to email",
@@ -254,24 +255,21 @@ exports.requestUnlockOtp = async (req, res) => {
       expiresAt: new Date(Date.now() + 10 * 60 * 1000),
     });
 
-    await transporter.sendMail({
-      from: `Makany <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: "Unlock Your Makany Account",
-      html: `
+    await sendEmail(
+      email,
+      "Unlock Your Makany Account",
+      `Your Makany account unlock code is: ${otp}. It expires in 10 minutes.`,
+      null,
+      `
         <div style="font-family:Arial;padding:20px">
           <h2 style="color:#2563eb">Makany</h2>
-
           <p>Your account has been temporarily locked because of multiple failed login attempts.</p>
-
           <p>Enter this verification code to unlock it immediately:</p>
-
           <h1 style="letter-spacing:5px">${otp}</h1>
-
           <p>This code expires in 10 minutes.</p>
         </div>
-      `,
-    });
+      `
+    );
 
     res.json({
       message: "Unlock OTP sent successfully.",

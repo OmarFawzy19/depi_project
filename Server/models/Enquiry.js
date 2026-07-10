@@ -1,4 +1,3 @@
-// models/Enquiry.js
 
 const mongoose = require("mongoose");
 

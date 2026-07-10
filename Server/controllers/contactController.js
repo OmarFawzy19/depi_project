@@ -29,7 +29,7 @@ exports.sendContactForm = async (req, res) => {
         SUPPORT_EMAIL,
         `[Contact Form] ${category} – from ${name}`,
         emailBody,
-        email   // replyTo → sender's email so you can reply directly
+        email
     );
 
     res.status(200).json({ message: "Your message has been sent successfully." });

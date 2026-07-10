@@ -5,7 +5,7 @@ const sendEmail = require("../utils/sendEmail");
 
 
 exports.sendEnquiry = async (req, res) => {
-
+  try {
     const property = await Property.findById(
         req.params.propertyId
     ).populate("owner");
@@ -34,9 +34,8 @@ exports.sendEnquiry = async (req, res) => {
     const buyerName = buyer ? (buyer.name || buyer.email) : "A potential buyer";
     const propertyTitle = property.title || "a property";
 
-    // Build a clear property details block
     const priceFormatted = property.price
-        ? `${property.price.toLocaleString()} EGP ${property.priceType === "rent" ? "/ month" : "(for sale"}`
+        ? `${property.price.toLocaleString()} EGP ${property.priceType === "rent" ? "/ month" : "(for sale)"}`
         : "N/A";
 
     const propertyDetails =
@@ -65,7 +64,6 @@ exports.sendEnquiry = async (req, res) => {
         `To reply directly to the buyer, simply hit Reply on this email.\n` +
         `This message was sent via Makany.`;
 
-    // replyTo is set to the buyer's email so the owner's reply goes directly to them
     await sendEmail(
         property.owner.email,
         `New Enquiry from ${buyerName} – ${propertyTitle}`,
@@ -74,28 +72,37 @@ exports.sendEnquiry = async (req, res) => {
     );
 
     res.status(201).json(enquiry);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
 
 
-exports.ownerEnquiries = async (req,res)=>{
-
+exports.ownerEnquiries = async (req, res) => {
+  try {
     const enquiries = await Enquiry.find({
-        owner:req.user.id
+        owner: req.user.id
     })
     .populate("property")
     .populate("seeker");
 
     res.json(enquiries);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
 
 
-exports.seekerEnquiries = async (req,res)=>{
-
+exports.seekerEnquiries = async (req, res) => {
+  try {
     const enquiries = await Enquiry.find({
-        seeker:req.user.id
+        seeker: req.user.id
     })
     .populate("property")
     .populate("owner");
 
     res.json(enquiries);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };

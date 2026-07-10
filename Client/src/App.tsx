@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppRouter } from "@/routes/AppRouter";
 import { ThemeProvider } from "@/hooks/ThemeContext";
-
+import { FavoritesProvider } from "@/hooks/FavoritesContext";
 
 const queryClient = new QueryClient();
 
@@ -12,10 +12,11 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <ThemeProvider>
-        <Toaster />
-        <Sonner />
-        <AppRouter />
-
+        <FavoritesProvider>
+          <Toaster />
+          <Sonner />
+          <AppRouter />
+        </FavoritesProvider>
       </ThemeProvider>
     </TooltipProvider>
   </QueryClientProvider>

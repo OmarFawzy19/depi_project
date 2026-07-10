@@ -1,4 +1,4 @@
-﻿const nodemailer = require("nodemailer");
+const nodemailer = require("nodemailer");
 const getTransportConfig = (emailAddress) => {
     const domain = emailAddress.split("@")[1]?.toLowerCase();
 
@@ -53,13 +53,17 @@ const transporter = nodemailer.createTransport(
     getTransportConfig(process.env.EMAIL_USER || "")
 );
 
-const sendEmail = async (to, subject, text, replyTo = null) => {
+const sendEmail = async (to, subject, text, replyTo = null, html = null) => {
     const mailOptions = {
         from: `"Makany" <${process.env.EMAIL_USER}>`,
         to,
         subject,
         text,
     };
+
+    if (html) {
+        mailOptions.html = html;
+    }
 
     if (replyTo) {
         mailOptions.replyTo = replyTo;
