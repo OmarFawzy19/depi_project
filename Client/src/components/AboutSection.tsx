@@ -4,7 +4,7 @@ import { Sparkles, Building2, Globe, ShieldCheck, MapIcon, Users } from "lucide-
 export function AboutSection() {
   return (
     <section id="about" className="py-24 sm:py-32 bg-background relative overflow-hidden">
-      {/* Soft background mesh */}
+
       <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
         <div className="absolute top-1/4 left-1/4 w-[40rem] h-[40rem] rounded-full bg-primary/10 blur-3xl mix-blend-multiply" />
         <div className="absolute bottom-1/4 right-1/4 w-[40rem] h-[40rem] rounded-full bg-purple-500/10 blur-3xl mix-blend-multiply" />
@@ -12,7 +12,7 @@ export function AboutSection() {
 
       <div className="container mx-auto px-4 relative z-10">
 
-        {/* Section Header */}
+
         <div className="text-center max-w-2xl mx-auto mb-16">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -33,10 +33,10 @@ export function AboutSection() {
           </motion.p>
         </div>
 
-        {/* Bento Grid */}
+
         <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-3 gap-6 max-w-6xl mx-auto">
 
-          {/* Main Story Card (Spans 2 cols, 2 rows) */}
+
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -70,7 +70,7 @@ export function AboutSection() {
             </div>
           </motion.div>
 
-          {/* Value 1 */}
+
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -87,7 +87,7 @@ export function AboutSection() {
             </div>
           </motion.div>
 
-          {/* Value 2 */}
+
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -104,7 +104,6 @@ export function AboutSection() {
             </div>
           </motion.div>
 
-          {/* Vision/Quote Card (Spans 2 cols) */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -112,7 +111,7 @@ export function AboutSection() {
             transition={{ delay: 0.3 }}
             className="md:col-span-2 rounded-[2.5rem] bg-primary p-10 sm:p-12 text-primary-foreground flex flex-col sm:flex-row items-center gap-8 shadow-xl relative overflow-hidden"
           >
-            {/* Glow effect inside blue card */}
+
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-3xl rounded-full" />
 
             <div className="w-20 h-20 shrink-0 rounded-3xl bg-white/20 flex items-center justify-center text-white backdrop-blur-md relative z-10 shadow-inner">
@@ -131,7 +130,7 @@ export function AboutSection() {
             </div>
           </motion.div>
 
-          {/* Value 3 */}
+
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
