@@ -51,6 +51,10 @@ const Register = () => {
     }
   };
 
+  const handleGoogleRegister = () => {
+  window.location.href = "http://localhost:5000/api/auth/google";
+};
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
@@ -172,10 +176,11 @@ const Register = () => {
           </div>
 
           <Button
-            variant="outline"
-            className="mt-4 w-full gap-2"
-            size="lg"
-          >
+  variant="outline"
+  className="mt-4 w-full gap-2"
+  size="lg"
+  onClick={handleGoogleRegister}
+>
             <svg className="h-4 w-4" viewBox="0 0 24 24">
               <path
                 fill="#4285F4"
@@ -195,7 +200,7 @@ const Register = () => {
               />
             </svg>
 
-            Google
+Continue with Google
           </Button>
         </div>
 
