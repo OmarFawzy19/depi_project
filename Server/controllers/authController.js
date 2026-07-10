@@ -93,10 +93,29 @@ if (!isMatch) {
 
     await user.save();
 
+    // Send security alert email
+    try {
+        await sendEmail(
+            user.email,
+            "Security Alert: Your Makany Account is Locked",
+            "Your account has been locked due to multiple failed login attempts. It will unlock in 1 hour.",
+            null,
+            `<div style="font-family: Arial; padding: 20px;">
+              <h2 style="color:#d93025;">Security Alert</h2>
+              <p>Hello ${user.name},</p>
+              <p>We noticed multiple failed login attempts on your account. For your security, your account has been temporarily locked for 1 hour.</p>
+              <p>If this was you, you can unlock it immediately using the "Unlock Account" option on the login page.</p>
+              <p>If you didn't do this, please reset your password immediately.</p>
+            </div>`
+        );
+    } catch (err) {
+        console.error("Failed to send lock alert email:", err);
+    }
+
     return res.status(403).json({
-  error: "Too many failed login attempts.",
-  locked: true,
-});
+      error: "Too many failed login attempts.",
+      locked: true,
+    });
   }
 
   await user.save();
