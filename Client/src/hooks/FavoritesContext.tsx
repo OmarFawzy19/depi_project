@@ -11,10 +11,10 @@ interface FavoritesContextType {
 
 const FavoritesContext = createContext<FavoritesContextType>({
   favoriteIds: new Set(),
-  toggleFavorite: async () => {},
+  toggleFavorite: async () => { },
   isFavorite: () => false,
   loading: false,
-  refresh: () => {},
+  refresh: () => { },
 });
 
 export function FavoritesProvider({ children }: { children: ReactNode }) {

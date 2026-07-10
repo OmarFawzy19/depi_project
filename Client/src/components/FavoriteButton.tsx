@@ -15,7 +15,6 @@ export function FavoriteButton({ propertyId, className }: FavoriteButtonProps) {
   const { user } = useAuth();
   const isAuthed = Boolean(user);
 
-  // Admins should not see or interact with favorite hearts
   if (user?.role === "admin") return null;
 
   const { toast } = useToast();

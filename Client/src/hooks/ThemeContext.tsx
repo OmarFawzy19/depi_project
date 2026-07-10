@@ -17,12 +17,10 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-/** Returns the localStorage key used to persist a logged-in user's theme. */
 function userThemeKey(userId: string) {
   return `theme_${userId}`;
 }
 
-/** Apply or remove the `dark` class on <html> and update color-scheme. */
 function applyTheme(theme: Theme) {
   const root = document.documentElement;
   if (theme === "dark") {
@@ -34,9 +32,8 @@ function applyTheme(theme: Theme) {
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  
+
   const [theme, setTheme] = useState<Theme>(() => {
-    // Initial load
     if (user) {
       const saved = localStorage.getItem(userThemeKey(user.id)) as Theme | null;
       return saved === "dark" ? "dark" : "light";
@@ -44,7 +41,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return "light";
   });
 
-  // When user logs in or out, update the theme
   useEffect(() => {
     if (user) {
       const saved = localStorage.getItem(userThemeKey(user.id)) as Theme | null;
@@ -54,7 +50,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, [user]);
 
-  // Apply the theme to <html> whenever it changes
   useEffect(() => {
     applyTheme(theme);
   }, [theme]);

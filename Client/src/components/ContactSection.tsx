@@ -146,9 +146,8 @@ export function ContactSection() {
           </p>
         </motion.div>
 
-        {/* Two-column card */}
         <div className="overflow-hidden rounded-3xl border border-border/70 shadow-card lg:grid lg:grid-cols-5">
-          {/* Left — gradient info panel */}
+
           <motion.div
             initial={{ opacity: 0, x: -28 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -196,12 +195,10 @@ export function ContactSection() {
               ))}
             </ul>
 
-            {/* Decorative blobs */}
             <div className="pointer-events-none absolute -bottom-16 -right-16 h-64 w-64 rounded-full bg-white/5 blur-3xl" />
             <div className="pointer-events-none absolute -top-10 -left-10 h-48 w-48 rounded-full bg-white/5 blur-2xl" />
           </motion.div>
 
-          {/* Right — form */}
           <motion.div
             initial={{ opacity: 0, x: 28 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -365,7 +362,6 @@ export function ContactSection() {
   );
 }
 
-/* ── Helpers ─────────────────────────────────────────────── */
 
 function Field({
   label,
