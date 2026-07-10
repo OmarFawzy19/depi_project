@@ -18,6 +18,7 @@ type Property = {
     email?: string;
   };
   status: string;
+  images?: string[];
 };
 
 const Admin = () => {
@@ -28,6 +29,9 @@ const Admin = () => {
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+  
+  const [imagesModalOpen, setImagesModalOpen] = useState(false);
+  const [currentImages, setCurrentImages] = useState<string[]>([]);
 
   const fetchPending = async () => {
     try {
@@ -155,7 +159,8 @@ const Admin = () => {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border text-left text-xs uppercase text-muted-foreground">
-                    <th className="py-2">Title</th>
+                    <th className="py-2">Image</th>
+                    <th>Title</th>
                     <th>Type</th>
                     <th>Price</th>
                     <th>Location</th>
@@ -168,6 +173,32 @@ const Admin = () => {
                 <tbody>
                   {pendingProperties.map((p) => (
                     <tr key={p._id} className="border-b border-border/60">
+                      <td className="py-3">
+                        {p.images && p.images.length > 0 ? (
+                          <div 
+                            className="relative cursor-pointer group h-12 w-20"
+                            onClick={() => {
+                              setCurrentImages(p.images || []);
+                              setImagesModalOpen(true);
+                            }}
+                          >
+                            <img
+                              src={p.images[0].startsWith('http') ? p.images[0] : `http://localhost:5000${p.images[0]}`}
+                              alt={p.title}
+                              className="h-12 w-20 object-cover rounded-md group-hover:opacity-80 transition-opacity"
+                            />
+                            {p.images.length > 1 && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-md transition-opacity group-hover:bg-black/60">
+                                <span className="text-white text-xs font-semibold">+{p.images.length - 1}</span>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="h-12 w-20 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground">
+                            No image
+                          </div>
+                        )}
+                      </td>
                       <td className="py-3 font-medium">{p.title}</td>
                       <td className="capitalize">{p.type}</td>
                       <td>${p.price.toLocaleString()}</td>
@@ -227,6 +258,23 @@ const Admin = () => {
           className="w-full rounded-lg border border-border bg-background p-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           rows={1}
         />
+      </Modal>
+
+      <Modal
+        show={imagesModalOpen}
+        title="Property Images"
+        onClose={() => setImagesModalOpen(false)}
+      >
+        <div className="flex flex-col gap-4 max-h-[60vh] overflow-y-auto p-1 pr-2 custom-scrollbar">
+          {currentImages.map((img, idx) => (
+            <img
+              key={idx}
+              src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
+              alt={`Property image ${idx + 1}`}
+              className="w-full h-auto object-cover rounded-lg shadow-sm border border-border"
+            />
+          ))}
+        </div>
       </Modal>
     </div>
   );
